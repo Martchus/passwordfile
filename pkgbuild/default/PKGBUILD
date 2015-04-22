@@ -1,0 +1,23 @@
+pkgname=passwordfile
+pkgver=2.0.3
+pkgrel=3
+arch=('i686' 'x86_64')
+pkgdesc="A simple password store using AES-256-CBC encryption via OpenSSL."
+license=('GPL')
+depends=('c++utilities' 'openssl')
+makedepends=('qt5-base')
+install=
+url="http://martchus.netai.net/"
+source=("$pkgname.tar.gz")
+md5sums=('d359927292464fcf41c8a11315ff79e2')
+# head end
+build() {
+    cd $srcdir/$pkgname
+    INSTALL_ROOT=$pkgdir/usr/ qmake-qt5 "$pkgname.pro" -r -spec linux-g++
+    make
+}
+
+package() {
+    cd $srcdir/$pkgname
+    make install
+}
