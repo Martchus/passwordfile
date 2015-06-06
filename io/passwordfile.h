@@ -46,6 +46,7 @@ private:
     std::string m_path;
     char m_password[32];
     std::unique_ptr<NodeEntry> m_rootEntry;
+    std::string m_extendedHeader;
     std::fstream m_file;
     IoUtilities::BinaryReader m_freader;
     IoUtilities::BinaryWriter m_fwriter;

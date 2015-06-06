@@ -135,8 +135,9 @@ void PasswordFile::load()
     }
     // check version and flags (used in version 0x3 only)
     uint32 version = m_freader.readUInt32LE();
-    if(version != 0x0U && version != 0x1U && version != 0x2U && version != 0x3U)
+    if(version != 0x0U && version != 0x1U && version != 0x2U && version != 0x3U && version != 0x4U) {
         throw ParsingException("Version is unknown.");
+    }
     bool decrypterUsed;
     bool ivUsed;
     bool compressionUsed;
@@ -149,6 +150,13 @@ void PasswordFile::load()
         decrypterUsed = version >= 0x1U;
         ivUsed = version == 0x2U;
         compressionUsed = false;
+    }
+    // skip extended header
+    // the extended header might be used in further versions to
+    // add additional information without breaking compatibility
+    if(version == 0x4U) {
+        uint16 extendedHeaderSize = m_freader.readUInt16BE();
+        m_extendedHeader = m_freader.readString(extendedHeaderSize);
     }
     // get length
     fstream::pos_type headerSize = m_file.tellg();
@@ -250,8 +258,7 @@ void PasswordFile::save(bool useEncryption, bool useCompression)
     m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
     // write header
     m_fwriter.writeUInt32LE(0x7770616DU); // write magic number
-    //m_fwriter.writeUInt32(useEncryption ? 2U : 0U); // write version (old versions)
-    m_fwriter.writeUInt32LE(0x3U); // write version
+    m_fwriter.writeUInt32LE(m_extendedHeader.empty() ? 0x3U : 0x4U); // write version, extended header requires version 4
     byte flags = 0x00;
     if(useEncryption) {
         flags |= 0x80 | 0x40;
@@ -260,6 +267,11 @@ void PasswordFile::save(bool useEncryption, bool useCompression)
         flags |= 0x20;
     }
     m_fwriter.writeByte(flags);
+    // write extened header
+    if(!m_extendedHeader.empty()) {
+        m_fwriter.writeUInt16BE(m_extendedHeader.size());
+        m_fwriter.writeString(m_extendedHeader);
+    }
     // serialize root entry and descendants
     stringstream buffstr(stringstream::in | stringstream::out | stringstream::binary);
     buffstr.exceptions(ios_base::failbit | ios_base::badbit);

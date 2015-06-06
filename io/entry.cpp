@@ -223,7 +223,7 @@ NodeEntry::NodeEntry(istream &stream) :
                     m_expandedByDefault = flags & 0x80;
                     extendedHeaderSize -= 1;
                 }
-                stream.seekg(extendedHeaderSize, ios_base::cur);
+                m_extendedData = reader.readString(extendedHeaderSize);
             }
             uint32 childCount = reader.readUInt32BE();
             for(uint32 i = 0; i < childCount; ++i) {
@@ -345,11 +345,16 @@ Entry *NodeEntry::entryByPath(list<string> &path, bool includeThis, EntryType *c
 void NodeEntry::make(ostream &stream) const
 {
     BinaryWriter writer(&stream);
-    writer.writeByte(isExpandedByDefault() ? 0x0 : 0x1); // version
+    writer.writeByte(isExpandedByDefault() && m_extendedData.empty() ? 0x0 : 0x1); // version
     writer.writeLengthPrefixedString(label());
-    if(!isExpandedByDefault()) {
-        writer.writeUInt16BE(1); // extended header is 1 byte long
-        writer.writeByte(0x00); // all flags cleared
+    if(!isExpandedByDefault() || !m_extendedData.empty()) {
+        writer.writeUInt16BE(1 + m_extendedData.size()); // extended header is 1 byte long
+        byte flags = 0x00;
+        if(isExpandedByDefault()) {
+            flags |= 0x80;
+        }
+        writer.writeByte(flags);
+        writer.writeString(m_extendedData);
     }
     writer.writeUInt32BE(m_children.size());
     for(const Entry *child : m_children) {
@@ -391,7 +396,7 @@ AccountEntry::AccountEntry(istream &stream)
             if(version == 0x1) { // version 0x1 has an extended header
                 uint16 extendedHeaderSize = reader.readUInt16BE();
                 // currently there's nothing to read here
-                stream.seekg(extendedHeaderSize, ios_base::cur);
+                m_extendedData = reader.readString(extendedHeaderSize);
             }
             uint32 fieldCount = reader.readUInt32BE();
             for(uint32 i = 0; i < fieldCount; ++i) {
@@ -425,8 +430,12 @@ AccountEntry::~AccountEntry()
 void AccountEntry::make(ostream &stream) const
 {
     BinaryWriter writer(&stream);
-    writer.writeByte(0x80 | 0x0); // version
+    writer.writeByte(0x80 | (m_extendedData.empty() ? 0x0 : 0x1)); // version
     writer.writeLengthPrefixedString(label());
+    if(!m_extendedData.empty()) {
+        writer.writeUInt16BE(m_extendedData.size());
+        writer.writeString(m_extendedData);
+    }
     writer.writeUInt32BE(m_fields.size());
     for(const Field &field : m_fields) {
         field.make(stream);

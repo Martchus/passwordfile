@@ -48,7 +48,7 @@ Field::Field(AccountEntry *tiedAccount, istream &stream)
         if(version == 0x1) { // version 0x1 has an extended header
             uint16 extendedHeaderSize = reader.readUInt16BE();
             // currently there's nothing to read here
-            stream.seekg(extendedHeaderSize, ios_base::cur);
+            m_extendedData = reader.readString(extendedHeaderSize);
         }
         m_tiedAccount = tiedAccount;
     } else {
@@ -62,10 +62,14 @@ Field::Field(AccountEntry *tiedAccount, istream &stream)
 void Field::make(ostream &stream) const
 {
     BinaryWriter writer(&stream);
-    writer.writeByte(0x0); // version
+    writer.writeByte(m_extendedData.empty() ? 0x0 : 0x1); // version
     writer.writeLengthPrefixedString(m_name);
     writer.writeLengthPrefixedString(m_value);
     writer.writeByte(static_cast<byte>(m_type));
+    if(!m_extendedData.empty()) {
+        writer.writeUInt16BE(m_extendedData.size());
+        writer.writeString(m_extendedData);
+    }
 }
 
 }

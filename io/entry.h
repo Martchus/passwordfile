@@ -53,6 +53,10 @@ private:
     std::string m_label;
     NodeEntry *m_parent;
     int m_index;
+
+protected:
+    std::string m_extendedData;
+
 };
 
 /*!
@@ -110,6 +114,7 @@ public:
     void setExpandedByDefault(bool expandedByDefault);
     virtual void make(std::ostream &stream) const;
     virtual NodeEntry *clone() const;
+
 private:
     std::vector<Entry *> m_children;
     bool m_expandedByDefault;

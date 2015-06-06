@@ -38,6 +38,10 @@ private:
     std::string m_value;
     FieldType m_type;
     AccountEntry *m_tiedAccount;
+
+protected:
+    std::string m_extendedData;
+
 };
 
 /*!
