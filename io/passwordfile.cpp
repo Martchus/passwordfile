@@ -135,7 +135,7 @@ void PasswordFile::load()
     }
     // check version and flags (used in version 0x3 only)
     uint32 version = m_freader.readUInt32LE();
-    if(version != 0x0U && version != 0x1U && version != 0x2U && version != 0x3U && version != 0x4U) {
+    if(version != 0x0U && version != 0x1U && version != 0x2U && version != 0x3U && version != 0x4U && version != 0x5U) {
         throw ParsingException("Version is unknown.");
     }
     bool decrypterUsed;
@@ -154,7 +154,7 @@ void PasswordFile::load()
     // skip extended header
     // the extended header might be used in further versions to
     // add additional information without breaking compatibility
-    if(version == 0x4U) {
+    if(version >= 0x4U) {
         uint16 extendedHeaderSize = m_freader.readUInt16BE();
         m_extendedHeader = m_freader.readString(extendedHeaderSize);
     }
@@ -235,6 +235,10 @@ void PasswordFile::load()
     buffstr.write(decbuff.data(), static_cast<streamsize>(size));
     decbuff.resize(0);
     buffstr.seekg(0, ios_base::beg);
+    if(version >= 0x5u) {
+        uint16 extendedHeaderSize = m_freader.readUInt16BE();
+        m_encryptedExtendedHeader = m_freader.readString(extendedHeaderSize);
+    }
     m_rootEntry.reset(new NodeEntry(buffstr));
 }
 
@@ -258,7 +262,8 @@ void PasswordFile::save(bool useEncryption, bool useCompression)
     m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
     // write header
     m_fwriter.writeUInt32LE(0x7770616DU); // write magic number
-    m_fwriter.writeUInt32LE(m_extendedHeader.empty() ? 0x3U : 0x4U); // write version, extended header requires version 4
+    // write version, extended header requires version 4, encrypted extended header required version 5
+    m_fwriter.writeUInt32LE(m_extendedHeader.empty() && m_encryptedExtendedHeader.empty() ? 0x3U : (m_encryptedExtendedHeader.empty() ? 0x4U : 0x5U));
     byte flags = 0x00;
     if(useEncryption) {
         flags |= 0x80 | 0x40;
@@ -275,6 +280,11 @@ void PasswordFile::save(bool useEncryption, bool useCompression)
     // serialize root entry and descendants
     stringstream buffstr(stringstream::in | stringstream::out | stringstream::binary);
     buffstr.exceptions(ios_base::failbit | ios_base::badbit);
+    // write encrypted extened header
+    if(!m_encryptedExtendedHeader.empty()) {
+        m_fwriter.writeUInt16BE(m_encryptedExtendedHeader.size());
+        m_fwriter.writeString(m_encryptedExtendedHeader);
+    }
     m_rootEntry->make(buffstr);
     buffstr.seekp(0, ios_base::end);
     stringstream::pos_type size = buffstr.tellp();
@@ -347,7 +357,7 @@ void PasswordFile::clearEntries()
 }
 
 /*!
- * \brief Closes the file if opened. Removes path, password and entries.
+ * \brief Closes the file if opened. Removes path, password and entries and additional information.
  */
 void PasswordFile::clear()
 {
@@ -355,6 +365,8 @@ void PasswordFile::clear()
     clearPath();
     clearPassword();
     clearEntries();
+    m_extendedHeader.clear();
+    m_encryptedExtendedHeader.clear();
 }
 
 /*!
