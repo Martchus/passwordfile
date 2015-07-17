@@ -66,13 +66,20 @@ LIBS += -lz
 INCLUDEPATH += ../
 
 # installs
-!android {
+mingw-w64-install {
+    target.path = $$(INSTALL_ROOT)
+    target.extra = install -m755 -D $${OUT_PWD}/release/lib$(TARGET).a $$(INSTALL_ROOT)/lib/lib$(TARGET).a
+    INSTALLS += target
+    dlltarget.path = $$(INSTALL_ROOT)
+    dlltarget.extra = install -m755 -D $${OUT_PWD}/release/$(TARGET) $$(INSTALL_ROOT)/bin/$(TARGET)
+    INSTALLS += dlltarget
+} else {
     target.path = $$(INSTALL_ROOT)/lib
     INSTALLS += target
-    for(dir, $$list(io util)) {
-        eval(inc_$${dir} = $${dir})
-        inc_$${dir}.path = $$(INSTALL_ROOT)/include/$$projectname/$${dir}
-        inc_$${dir}.files = $${dir}/*.h
-        INSTALLS += inc_$${dir}
-    }
+}
+for(dir, $$list(io util)) {
+    eval(inc_$${dir} = $${dir})
+    inc_$${dir}.path = $$(INSTALL_ROOT)/include/$$projectname/$${dir}
+    inc_$${dir}.files = $${dir}/*.h
+    INSTALLS += inc_$${dir}
 }
