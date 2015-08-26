@@ -1,5 +1,5 @@
 projectname = passwordfile
-VERSION = 2.0.5
+VERSION = 3.0.0
 
 # include ../../common.pri when building as part of a subdirs project; otherwise include general.pri
 !include(../../common.pri) {
@@ -10,9 +10,7 @@ VERSION = 2.0.5
 
 TEMPLATE = lib
 CONFIG -= qt
-win32 {
-    CONFIG += dll
-}
+CONFIG += shared
 
 # files
 SOURCES += aes/aes.cpp \
@@ -40,10 +38,11 @@ OTHER_FILES += \
 
 # libs and includepath
 CONFIG(debug, debug|release) {
-    LIBS += -L../../ -lc++utilitiesd
+    LIBS += -lc++utilitiesd
 } else {
-    LIBS += -L../../ -lc++utilities
+    LIBS += -lc++utilities
 }
+# TODO: remove build environment specific paths
 win32 {
     contains(QMAKE_TARGET.arch, x86_64):{
         LIBS += -L../../../openssl-mingw_amd64/lib/ -lcrypto
@@ -63,7 +62,6 @@ win32 {
     }
 }
 LIBS += -lz
-INCLUDEPATH += ../
 
 # installs
 mingw-w64-install {
