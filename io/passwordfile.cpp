@@ -1,7 +1,7 @@
-#include "passwordfile.h"
-#include "cryptoexception.h"
-#include "parsingexception.h"
-#include "entry.h"
+#include "./passwordfile.h"
+#include "./cryptoexception.h"
+#include "./parsingexception.h"
+#include "./entry.h"
 
 #include <openssl/conf.h>
 #include <openssl/err.h>

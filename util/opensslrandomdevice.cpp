@@ -1,5 +1,6 @@
-#include "opensslrandomdevice.h"
-#include "io/cryptoexception.h"
+#include "./opensslrandomdevice.h"
+
+#include "../io/cryptoexception.h"
 
 #include <c++utilities/conversion/binaryconversion.h>
 

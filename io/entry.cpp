@@ -1,5 +1,5 @@
-#include "entry.h"
-#include "parsingexception.h"
+#include "./entry.h"
+#include "./parsingexception.h"
 
 #include <c++utilities/io/binaryreader.h>
 #include <c++utilities/io/binarywriter.h>

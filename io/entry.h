@@ -1,7 +1,7 @@
 #ifndef ENTRY_H
 #define ENTRY_H
 
-#include "field.h"
+#include "./field.h"
 
 #include <c++utilities/conversion/types.h>
 #include <c++utilities/application/global.h>
