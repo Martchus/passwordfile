@@ -1,4 +1,7 @@
 projectname = passwordfile
+appname = "Passwordfile library"
+appauthor = Martchus
+QMAKE_TARGET_DESCRIPTION = "C++ library to read/write passwords from/to encrypted files."
 VERSION = 3.0.0
 
 # include ../../common.pri when building as part of a subdirs project; otherwise include general.pri
