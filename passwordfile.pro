@@ -37,7 +37,9 @@ HEADERS  += aes/aes.h \
 
 OTHER_FILES += \
     README.md \
-    LICENSE
+    LICENSE \
+    CMakeLists.txt \
+    config.h.in
 
 # libs and includepath
 CONFIG(debug, debug|release) {
