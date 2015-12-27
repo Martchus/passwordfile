@@ -27,8 +27,8 @@ set(META_APP_AUTHOR "Martchus")
 set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
 set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files.")
 set(META_VERSION_MAJOR 3)
-set(META_VERSION_MINOR 0)
-set(META_VERSION_PATCH 1)
+set(META_VERSION_MINOR 1)
+set(META_VERSION_PATCH 0)
 
 # stringification of meta data
 set(META_PROJECT_NAME_STR "\"${META_PROJECT_NAME}\"")
