@@ -28,7 +28,7 @@ set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
 set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files.")
 set(META_VERSION_MAJOR 3)
 set(META_VERSION_MINOR 1)
-set(META_VERSION_PATCH 0)
+set(META_VERSION_PATCH 1)
 
 # stringification of meta data
 set(META_PROJECT_NAME_STR "\"${META_PROJECT_NAME}\"")
@@ -51,19 +51,6 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 # add windows resource file
 if(MINGW)
-    # creation windows icon from png with ffmpeg if available
-    find_program(FFMPEG_BIN ffmpeg avconv)
-    if(FFMPEG_BIN)
-        set(PNG_ICON_PATH "${PROJECT_SOURCE_DIR}/resources/icons/hicolor/128x128/apps/${META_PROJECT_NAME}.png")
-        if(EXISTS ${PNG_ICON_PATH})
-            set(WINDOWS_ICON_PATH "${PROJECT_BINARY_DIR}/${META_PROJECT_NAME}.ico")
-            set(WINDOWS_ICON_RC_ENTRY "IDI_ICON1   ICON    DISCARDABLE \"${WINDOWS_ICON_PATH}\"")
-            add_custom_command(
-                OUTPUT "${WINDOWS_ICON_PATH}"
-                COMMAND ${FFMPEG_BIN} -y -i "${PNG_ICON_PATH}" -vf crop=iw-20:ih-20:10:10,scale=64:64 "${WINDOWS_ICON_PATH}"
-            )
-        endif()
-    endif(FFMPEG_BIN)
     # create windows rc file from template
     set(WINDOWS_EXT "dll")
     configure_file(
