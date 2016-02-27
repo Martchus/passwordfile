@@ -420,11 +420,16 @@ void PasswordFile::doBackup()
     if(!isOpen()) {
         open();
     }
-    fstream backupFile(m_path + ".backup", ios::out | ios::binary);
-    backupFile.exceptions(ios_base::failbit | ios_base::badbit);
-    m_file.seekg(0);
-    backupFile << m_file.rdbuf();
-    backupFile.close();
+    m_file.seekg(0, ios_base::end);
+    if(m_file.tellg()) {
+        m_file.seekg(0);
+        fstream backupFile(m_path + ".backup", ios::out | ios::trunc | ios::binary);
+        backupFile.exceptions(ios_base::failbit | ios_base::badbit);
+        backupFile << m_file.rdbuf();
+        backupFile.close();
+    } else {
+        // the current file is empty anyways
+    }
 }
 
 /*!
