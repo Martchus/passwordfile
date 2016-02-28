@@ -19,6 +19,13 @@ set(SRC_FILES
     util/openssl.cpp
     util/opensslrandomdevice.cpp
 )
+set(TEST_HEADER_FILES
+
+)
+set(TEST_SRC_FILES
+    tests/cppunit.cpp
+    tests/passwordfiletests.cpp
+)
 
 # meta data
 set(META_PROJECT_NAME passwordfile)
@@ -92,6 +99,18 @@ if(MINGW)
         CXX_STANDARD 11
     )
 endif(MINGW)
+
+# add check target
+if(NOT TARGET check)
+    set(CMAKE_CTEST_COMMAND ctest -V)
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+    enable_testing()
+endif()
+add_executable(${META_PROJECT_NAME}_tests EXCLUDE_FROM_ALL ${TEST_HEADER_FILES} ${TEST_SRC_FILES})
+target_link_libraries(${META_PROJECT_NAME}_tests ${META_PROJECT_NAME} cppunit)
+set_target_properties(${META_PROJECT_NAME}_tests PROPERTIES CXX_STANDARD 11)
+add_test(NAME ${META_PROJECT_NAME}_cppunit COMMAND ${META_PROJECT_NAME}_tests -p "${CMAKE_CURRENT_SOURCE_DIR}/testfiles")
+add_dependencies(check ${META_PROJECT_NAME}_tests)
 
 # add install target
 install(TARGETS ${META_PROJECT_NAME}
