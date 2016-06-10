@@ -27,6 +27,10 @@ set(TEST_SRC_FILES
     tests/passwordfiletests.cpp
 )
 
+set(DOC_FILES
+    README.md
+)
+
 # meta data
 set(META_PROJECT_NAME passwordfile)
 set(META_PROJECT_VARNAME PASSWORD_FILE)
@@ -36,10 +40,10 @@ set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
 set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files.")
 set(META_VERSION_MAJOR 3)
 set(META_VERSION_MINOR 1)
-set(META_VERSION_PATCH 1)
+set(META_VERSION_PATCH 2)
 
 # find c++utilities
-find_package(c++utilities 3.3.0 REQUIRED)
+find_package(c++utilities 4.0.0 REQUIRED)
 use_cpp_utilities()
 
 # find zlib
@@ -57,3 +61,4 @@ include(BasicConfig)
 include(WindowsResources)
 include(LibraryTarget)
 include(TestTarget)
+include(Doxygen)

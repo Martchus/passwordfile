@@ -245,6 +245,7 @@ void PasswordFile::load()
 /*!
  * \brief Writes the current root entry to the file.
  * \param useEncryption Specifies whether encryption should be used.
+ * \param useCompression Specifies whether compression should be used.
  * \throws Throws ios_base::failure when an IO error occurs.
  * \throws Throws runtime_error when no root entry is present.
  * \throws Throws Io::CryptoException when a decryption error occurs.

@@ -13,6 +13,9 @@ using namespace Io;
 
 using namespace CPPUNIT_NS;
 
+/*!
+ * \brief The PasswordFileTests class tests the Io::PasswordFile class.
+ */
 class PasswordFileTests : public TestFixture
 {
     CPPUNIT_TEST_SUITE(PasswordFileTests);

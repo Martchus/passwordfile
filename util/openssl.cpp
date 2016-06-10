@@ -4,10 +4,19 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 
+/*!
+ * \brief Contains utility classes and functions.
+ */
 namespace Util {
 
+/*!
+ * \brief Contains functions utilizing the usage of OpenSSL.
+ */
 namespace OpenSsl {
 
+/*!
+ * \brief Initializes OpenSSL.
+ */
 void init()
 {
     // load the human readable error strings for libcrypto
@@ -18,6 +27,9 @@ void init()
     OPENSSL_config(NULL);
 }
 
+/*!
+ * \brief Cleans resources of OpenSSL.
+ */
 void clean()
 {
     // removes all digests and ciphers
