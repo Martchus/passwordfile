@@ -3,6 +3,8 @@
 #include "./parsingexception.h"
 #include "./entry.h"
 
+#include <c++utilities/io/catchiofailure.h>
+
 #include <openssl/conf.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
@@ -81,12 +83,12 @@ void PasswordFile::open(bool readOnly)
 {
     close();
     if(m_path.empty()) {
-        throw ios_base::failure("Unable to open file because path is emtpy.");
+        throwIoFailure("Unable to open file because path is emtpy.");
     }
     m_file.open(m_path, readOnly ? ios_base::in | ios_base::binary : ios_base::in | ios_base::out | ios_base::binary);
     m_file.seekg(0, ios_base::end);
     if(m_file.tellg() == 0) {
-        throw ios_base::failure("File is empty.");
+        throwIoFailure("File is empty.");
     } else {
         m_file.seekg(0);
     }
@@ -110,7 +112,7 @@ void PasswordFile::create()
 {
     close();
     if(m_path.empty()) {
-        throw ios_base::failure("Unable to create file because path is empty.");
+        throwIoFailure("Unable to create file because path is empty.");
     }
     m_file.open(m_path, fstream::out | fstream::trunc | fstream::binary);
 }
