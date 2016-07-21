@@ -37,7 +37,7 @@ set(META_PROJECT_VARNAME PASSWORD_FILE)
 set(META_APP_NAME "Passwordfile library")
 set(META_APP_AUTHOR "Martchus")
 set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
-set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files.")
+set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files")
 set(META_VERSION_MAJOR 3)
 set(META_VERSION_MINOR 1)
 set(META_VERSION_PATCH 2)
@@ -46,15 +46,10 @@ set(META_VERSION_PATCH 2)
 find_package(c++utilities 4.0.0 REQUIRED)
 use_cpp_utilities()
 
-# find zlib
-find_package(ZLIB REQUIRED)
-include_directories(${ZLIB_INCLUDE_DIRS})
-list(APPEND LIBRARIES ${ZLIB_LIBRARIES})
-
-# find OpenSSL
-find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
-list(APPEND LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+# find 3rd party libraries
+include(3rdParty)
+use_external_library_from_package(ZLIB ANY_VERSION ZLIB_INCLUDE_DIRS ZLIB_LIBRARIES AUTO_LINKAGE REQUIRED) # zlib
+use_external_library_from_package(OpenSSL ANY_VERSION OPENSSL_INCLUDE_DIR OPENSSL_CRYPTO_LIBRARY AUTO_LINKAGE REQUIRED) # OpenSSL
 
 # include modules to apply configuration
 include(BasicConfig)
