@@ -48,8 +48,24 @@ use_cpp_utilities()
 
 # find 3rd party libraries
 include(3rdParty)
-use_external_library_from_package(ZLIB ANY_VERSION ZLIB_INCLUDE_DIRS ZLIB_LIBRARIES AUTO_LINKAGE REQUIRED) # zlib
-use_external_library_from_package(OpenSSL ANY_VERSION OPENSSL_INCLUDE_DIR OPENSSL_CRYPTO_LIBRARY AUTO_LINKAGE REQUIRED) # OpenSSL
+# zlib
+use_external_library_from_package(
+    z
+    ZLIB ANY_VERSION
+    ZLIB_INCLUDE_DIRS
+    ZLIB_LIBRARIES
+    AUTO_LINKAGE
+    REQUIRED
+)
+# crypto library from OpenSSL
+use_external_library_from_package(
+    crypto
+    OpenSSL ANY_VERSION
+    OPENSSL_INCLUDE_DIR
+    OPENSSL_CRYPTO_LIBRARY
+    AUTO_LINKAGE
+    REQUIRED
+)
 
 # include modules to apply configuration
 include(BasicConfig)
