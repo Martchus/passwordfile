@@ -1,14 +1,14 @@
 #ifndef OPENSSL_H
 #define OPENSSL_H
 
-#include <c++utilities/application/global.h>
+#include "../global.h"
 
 namespace Util {
 
 namespace OpenSsl {
 
-void LIB_EXPORT init();
-void LIB_EXPORT clean();
+void PASSWORD_FILE_EXPORT init();
+void PASSWORD_FILE_EXPORT clean();
 
 }
 

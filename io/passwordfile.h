@@ -1,6 +1,8 @@
 #ifndef PASSWORDFILE_H
 #define PASSWORDFILE_H
 
+#include "../global.h"
+
 #include <c++utilities/io/binaryreader.h>
 #include <c++utilities/io/binarywriter.h>
 
@@ -13,7 +15,7 @@ namespace Io {
 
 class NodeEntry;
 
-class LIB_EXPORT PasswordFile
+class PASSWORD_FILE_EXPORT PasswordFile
 {   
 public:
     explicit PasswordFile();

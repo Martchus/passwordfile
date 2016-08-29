@@ -1,7 +1,7 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include <c++utilities/application/global.h>
+#include "../global.h"
 
 #include <iostream>
 #include <string>
@@ -16,7 +16,7 @@ enum class FieldType : int
 
 class AccountEntry;
 
-class LIB_EXPORT Field
+class PASSWORD_FILE_EXPORT Field
 {
 public:
     Field(AccountEntry *tiedAccount, const std::string &name = std::string(), const std::string &value = std::string());

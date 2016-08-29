@@ -4,7 +4,6 @@
 #include "./field.h"
 
 #include <c++utilities/conversion/types.h>
-#include <c++utilities/application/global.h>
 
 #include <iostream>
 #include <string>
@@ -24,7 +23,7 @@ enum class EntryType : int
 
 class NodeEntry;
 
-class LIB_EXPORT Entry
+class PASSWORD_FILE_EXPORT Entry
 {
     friend class NodeEntry;
 public:
@@ -95,7 +94,7 @@ inline int Entry::index() const
     return m_index;
 }
 
-class LIB_EXPORT NodeEntry : public Entry
+class PASSWORD_FILE_EXPORT NodeEntry : public Entry
 {
     friend class Entry;
 public:
@@ -145,7 +144,7 @@ inline bool Entry::denotesNodeEntry(byte version)
     return (version & 0x80) == 0;
 }
 
-class LIB_EXPORT AccountEntry : public Entry
+class PASSWORD_FILE_EXPORT AccountEntry : public Entry
 {
 public:
     AccountEntry();

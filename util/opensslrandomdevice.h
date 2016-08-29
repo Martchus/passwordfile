@@ -1,12 +1,13 @@
 #ifndef OPENSSLRANDOMDEVICE_H
 #define OPENSSLRANDOMDEVICE_H
 
+#include "../global.h"
+
 #include <c++utilities/conversion/types.h>
-#include <c++utilities/application/global.h>
 
 namespace Util {
 
-class LIB_EXPORT OpenSslRandomDevice
+class PASSWORD_FILE_EXPORT OpenSslRandomDevice
 {
 public:
     OpenSslRandomDevice();

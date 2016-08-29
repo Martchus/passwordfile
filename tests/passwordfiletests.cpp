@@ -3,7 +3,6 @@
 #include "../io/entry.h"
 
 #include <c++utilities/tests/testutils.h>
-#include <c++utilities/application/global.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestFixture.h>
