@@ -14,4 +14,14 @@
 # define PASSWORD_FILE_IMPORT LIB_IMPORT
 #endif
 
+/*!
+ * \def PASSWORD_FILE_EXPORT
+ * \brief Marks the symbol to be exported by the passwordfile library.
+ */
+
+/*!
+ * \def PASSWORD_FILE_IMPORT
+ * \brief Marks the symbol to be imported from the passwordfile library.
+ */
+
 #endif // PASSWORD_FILE_GLOBAL
