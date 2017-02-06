@@ -71,26 +71,26 @@ void PasswordFileTests::testReading(const string &testfile1path, const string &t
     file.load();
     // test root entry
     const NodeEntry *rootEntry = file.rootEntry();
-    CPPUNIT_ASSERT(rootEntry->label() == "testfile1");
-    CPPUNIT_ASSERT(rootEntry->children().size() == 4);
+    CPPUNIT_ASSERT_EQUAL("testfile1"s, rootEntry->label());
+    CPPUNIT_ASSERT_EQUAL(4ul, rootEntry->children().size());
 
     // test testaccount1
-    CPPUNIT_ASSERT(rootEntry->children()[0]->label() == "testaccount1");
+    CPPUNIT_ASSERT_EQUAL("testaccount1"s, rootEntry->children()[0]->label());
     CPPUNIT_ASSERT(rootEntry->children()[0]->type() == EntryType::Account);
-    CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).name() == "pin");
-    CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).value() == "123456");
+    CPPUNIT_ASSERT_EQUAL("pin"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).name());
+    CPPUNIT_ASSERT_EQUAL("123456"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).value());
     CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).type() == FieldType::Password);
     CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).tiedAccount() == static_cast<AccountEntry *>(rootEntry->children()[0]));
     CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(1).type() == FieldType::Normal);
     CPPUNIT_ASSERT_THROW(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(2), out_of_range);
 
     // test testaccount2
-    CPPUNIT_ASSERT(rootEntry->children()[1]->label() == "testaccount2");
+    CPPUNIT_ASSERT_EQUAL("testaccount2"s, rootEntry->children()[1]->label());
     CPPUNIT_ASSERT(rootEntry->children()[1]->type() == EntryType::Account);
     CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[1])->fields().empty());
 
     // test testcategory1
-    CPPUNIT_ASSERT(rootEntry->children()[2]->label() == "testcategory1");
+    CPPUNIT_ASSERT_EQUAL("testcategory1"s, rootEntry->children()[2]->label());
     CPPUNIT_ASSERT(rootEntry->children()[2]->type() == EntryType::Node);
     const NodeEntry *category = static_cast<NodeEntry *>(rootEntry->children()[2]);
     CPPUNIT_ASSERT(category->children().size() == 3);
@@ -98,7 +98,7 @@ void PasswordFileTests::testReading(const string &testfile1path, const string &t
     CPPUNIT_ASSERT(static_cast<NodeEntry *>(category->children()[2])->children().size() == 2);
 
     // test testaccount3
-    CPPUNIT_ASSERT(rootEntry->children()[3]->label() == "testaccount3");
+    CPPUNIT_ASSERT_EQUAL("testaccount3"s, rootEntry->children()[3]->label());
 
     // open testfile 2
     file.setPath(testfile2);

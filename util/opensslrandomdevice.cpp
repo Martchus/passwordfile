@@ -41,7 +41,7 @@ uint32 OpenSslRandomDevice::operator ()() const {
         unsigned long errorCode = ERR_get_error();
         while(errorCode != 0) {
             if(!msg.empty()) {
-                msg += "\n";
+                msg += '\n';
             }
             msg += ERR_error_string(errorCode, 0);
             errorCode = ERR_get_error();
