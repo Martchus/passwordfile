@@ -40,7 +40,7 @@ set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
 set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files")
 set(META_VERSION_MAJOR 3)
 set(META_VERSION_MINOR 1)
-set(META_VERSION_PATCH 3)
+set(META_VERSION_PATCH 4)
 set(META_PUBLIC_SHARED_LIB_DEPENDS c++utilities)
 set(META_PUBLIC_STATIC_LIB_DEPENDS c++utilities_static)
 

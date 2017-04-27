@@ -23,8 +23,6 @@ void init()
     ERR_load_crypto_strings();
     // load all digest and cipher algorithms
     OpenSSL_add_all_algorithms();
-    // load config file, and other important initialisation
-    OPENSSL_config(NULL);
 }
 
 /*!
