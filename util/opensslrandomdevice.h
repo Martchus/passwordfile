@@ -7,14 +7,12 @@
 
 namespace Util {
 
-class PASSWORD_FILE_EXPORT OpenSslRandomDevice
-{
+class PASSWORD_FILE_EXPORT OpenSslRandomDevice {
 public:
     OpenSslRandomDevice();
     uint32 operator()() const;
     bool status() const;
 };
-
 }
 
 #endif // OPENSSLRANDOMDEVICE_H

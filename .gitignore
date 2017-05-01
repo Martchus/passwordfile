@@ -42,3 +42,6 @@ Makefile*
 
 # tests
 *.backup
+
+# clang-format
+/.clang-format

@@ -8,16 +8,11 @@
 
 namespace Io {
 
-enum class FieldType : int
-{
-    Normal,
-    Password
-};
+enum class FieldType : int { Normal, Password };
 
 class AccountEntry;
 
-class PASSWORD_FILE_EXPORT Field
-{
+class PASSWORD_FILE_EXPORT Field {
 public:
     Field(AccountEntry *tiedAccount, const std::string &name = std::string(), const std::string &value = std::string());
     Field(AccountEntry *tiedAccount, std::istream &stream);
@@ -41,7 +36,6 @@ private:
 
 protected:
     std::string m_extendedData;
-
 };
 
 /*!
@@ -115,7 +109,6 @@ inline bool Field::isValidType(int number)
 {
     return number >= 0 && number <= 1;
 }
-
 }
 
 #endif // FIELD_H

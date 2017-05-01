@@ -9,9 +9,7 @@ namespace OpenSsl {
 
 void PASSWORD_FILE_EXPORT init();
 void PASSWORD_FILE_EXPORT clean();
-
 }
-
 }
 
 #endif // OPENSSL_H

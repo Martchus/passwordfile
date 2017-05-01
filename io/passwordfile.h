@@ -6,17 +6,16 @@
 #include <c++utilities/io/binaryreader.h>
 #include <c++utilities/io/binarywriter.h>
 
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <memory>
+#include <string>
 
 namespace Io {
 
 class NodeEntry;
 
-class PASSWORD_FILE_EXPORT PasswordFile
-{   
+class PASSWORD_FILE_EXPORT PasswordFile {
 public:
     explicit PasswordFile();
     explicit PasswordFile(const std::string &path, const std::string &password);
@@ -44,6 +43,7 @@ public:
     bool isEncryptionUsed();
     bool isOpen() const;
     size_t size();
+
 private:
     std::string m_path;
     char m_password[32];
@@ -54,7 +54,6 @@ private:
     IoUtilities::BinaryReader m_freader;
     IoUtilities::BinaryWriter m_fwriter;
 };
-
 }
 
 #endif // PASSWORDFILE_H

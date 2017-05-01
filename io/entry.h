@@ -6,26 +6,25 @@
 #include <c++utilities/conversion/types.h>
 
 #include <iostream>
+#include <list>
 #include <string>
 #include <vector>
-#include <list>
 
 namespace Io {
 
 /*!
  * \brief Specifies the entry type.
  */
-enum class EntryType : int
-{
+enum class EntryType : int {
     Node, /**< denotes a NodeEntry */
     Account /**< denotes an AccountEntry */
 };
 
 class NodeEntry;
 
-class PASSWORD_FILE_EXPORT Entry
-{
+class PASSWORD_FILE_EXPORT Entry {
     friend class NodeEntry;
+
 public:
     virtual ~Entry();
     Entry &operator=(const Entry &other) = delete;
@@ -55,7 +54,6 @@ private:
 
 protected:
     std::string m_extendedData;
-
 };
 
 /*!
@@ -94,9 +92,9 @@ inline int Entry::index() const
     return m_index;
 }
 
-class PASSWORD_FILE_EXPORT NodeEntry : public Entry
-{
+class PASSWORD_FILE_EXPORT NodeEntry : public Entry {
     friend class Entry;
+
 public:
     NodeEntry();
     NodeEntry(const std::string &label, NodeEntry *parent = nullptr);
@@ -144,8 +142,7 @@ inline bool Entry::denotesNodeEntry(byte version)
     return (version & 0x80) == 0;
 }
 
-class PASSWORD_FILE_EXPORT AccountEntry : public Entry
-{
+class PASSWORD_FILE_EXPORT AccountEntry : public Entry {
 public:
     AccountEntry();
     AccountEntry(const std::string &label, NodeEntry *parent = nullptr);
@@ -158,6 +155,7 @@ public:
     std::vector<Field> &fields();
     virtual void make(std::ostream &stream) const;
     virtual AccountEntry *clone() const;
+
 private:
     std::vector<Field> m_fields;
 };
@@ -176,7 +174,6 @@ inline std::vector<Field> &AccountEntry::fields()
 {
     return m_fields;
 }
-
 }
 
 #endif // ENTRY_H

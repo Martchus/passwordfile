@@ -10,14 +10,14 @@ namespace Io {
 /*!
  * \brief Constructs a parsing exception.
  */
-ParsingException::ParsingException(const std::string &message) USE_NOTHROW :
-    runtime_error(message)
-{}
+ParsingException::ParsingException(const std::string &message) USE_NOTHROW : runtime_error(message)
+{
+}
 
 /*!
  * \brief Destroys the exception.
  */
 ParsingException::~ParsingException() USE_NOTHROW
-{}
-
+{
+}
 }

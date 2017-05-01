@@ -4,8 +4,8 @@
 #include <c++utilities/io/binaryreader.h>
 #include <c++utilities/io/binarywriter.h>
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 using namespace std;
 using namespace IoUtilities;
@@ -29,9 +29,9 @@ namespace Io {
 /*!
  * \brief Constructs a new entry with the specified \a label and \a parent.
  */
-Entry::Entry(const string &label, NodeEntry *parent) :
-    m_parent(nullptr),
-    m_index(-1)
+Entry::Entry(const string &label, NodeEntry *parent)
+    : m_parent(nullptr)
+    , m_index(-1)
 {
     setParent(parent);
     setLabel(label);
@@ -42,11 +42,12 @@ Entry::Entry(const string &label, NodeEntry *parent) :
  * \remarks The copy will be parentless and thus not be embedded in the hierarchy
  *          of \a other. Child entries will be copied as well.
  */
-Entry::Entry(const Entry &other) :
-    m_label(other.m_label),
-    m_parent(nullptr),
-    m_index(-1)
-{}
+Entry::Entry(const Entry &other)
+    : m_label(other.m_label)
+    , m_parent(nullptr)
+    , m_index(-1)
+{
+}
 
 /*!
  * \brief Destroys the entry.
@@ -62,15 +63,15 @@ Entry::~Entry()
  */
 void Entry::makeLabelUnique()
 {
-    if(m_parent) {
+    if (m_parent) {
         int index = 1;
         string currentLabel(label());
-        checkLabel:
-        for(Entry *sibling : m_parent->children()) {
-            if(sibling != this && currentLabel == sibling->label()) {
+    checkLabel:
+        for (Entry *sibling : m_parent->children()) {
+            if (sibling != this && currentLabel == sibling->label()) {
                 stringstream newLabel(currentLabel);
                 newLabel.seekp(0, ios_base::end);
-                if(newLabel.tellp()) {
+                if (newLabel.tellp()) {
                     newLabel << ' ';
                 }
                 newLabel << ++index;
@@ -90,20 +91,19 @@ void Entry::makeLabelUnique()
  */
 void Entry::setParent(NodeEntry *parent, int index)
 {
-    if(m_parent != parent || (m_index != index && index >= 0)) {
-        if(m_parent) {
+    if (m_parent != parent || (m_index != index && index >= 0)) {
+        if (m_parent) {
             m_parent->m_children.erase(m_parent->m_children.begin() + m_index);
-            for(auto i = m_parent->m_children.begin() + m_index; i < m_parent->m_children.end(); ++i) {
+            for (auto i = m_parent->m_children.begin() + m_index; i < m_parent->m_children.end(); ++i) {
                 (*i)->m_index -= 1;
             }
         }
-        if(parent) {
-            if(index < 0 || static_cast<size_t>(index) >= parent->m_children.size()) {
+        if (parent) {
+            if (index < 0 || static_cast<size_t>(index) >= parent->m_children.size()) {
                 m_index = parent->m_children.size();
                 parent->m_children.push_back(this);
             } else {
-                for(auto i = parent->m_children.insert(parent->m_children.begin() + index, this) + 1;
-                    i != parent->m_children.end(); ++i) {
+                for (auto i = parent->m_children.insert(parent->m_children.begin() + index, this) + 1; i != parent->m_children.end(); ++i) {
                     (*i)->m_index += 1;
                 }
                 m_index = index;
@@ -121,8 +121,8 @@ void Entry::setParent(NodeEntry *parent, int index)
  */
 bool Entry::isIndirectChildOf(NodeEntry *entry) const
 {
-    if(parent()) {
-        if(parent() == entry) {
+    if (parent()) {
+        if (parent() == entry) {
             return true;
         } else {
             return parent()->isIndirectChildOf(entry);
@@ -147,7 +147,7 @@ std::list<string> Entry::path() const
  */
 void Entry::path(std::list<string> &res) const
 {
-    if(m_parent) {
+    if (m_parent) {
         m_parent->path(res);
     }
     res.push_back(label());
@@ -160,7 +160,7 @@ void Entry::path(std::list<string> &res) const
 Entry *Entry::parse(istream &stream)
 {
     byte version = stream.peek();
-    if(denotesNodeEntry(version)) {
+    if (denotesNodeEntry(version)) {
         return new NodeEntry(stream);
     } else {
         return new AccountEntry(stream);
@@ -192,33 +192,35 @@ Entry *Entry::parse(istream &stream)
 /*!
  * \brief Constructs a new node entry.
  */
-NodeEntry::NodeEntry() :
-    Entry(),
-    m_expandedByDefault(true)
-{}
+NodeEntry::NodeEntry()
+    : Entry()
+    , m_expandedByDefault(true)
+{
+}
 
 /*!
  * \brief Constructs a new node entry with the specified \a label and \a parent.
  */
-NodeEntry::NodeEntry(const string &label, NodeEntry *parent) :
-    Entry(label, parent),
-    m_expandedByDefault(true)
-{}
+NodeEntry::NodeEntry(const string &label, NodeEntry *parent)
+    : Entry(label, parent)
+    , m_expandedByDefault(true)
+{
+}
 
 /*!
  * \brief Constructs a new node entry which is deserialized from the specified \a stream.
  */
-NodeEntry::NodeEntry(istream &stream) :
-    m_expandedByDefault(true)
+NodeEntry::NodeEntry(istream &stream)
+    : m_expandedByDefault(true)
 {
     BinaryReader reader(&stream);
     byte version = reader.readByte();
-    if(denotesNodeEntry(version)) {
-        if(version == 0x0 || version == 0x1) {
+    if (denotesNodeEntry(version)) {
+        if (version == 0x0 || version == 0x1) {
             setLabel(reader.readLengthPrefixedString());
-            if(version == 0x1) { // version 0x1 has an extended header
+            if (version == 0x1) { // version 0x1 has an extended header
                 uint16 extendedHeaderSize = reader.readUInt16BE();
-                if(extendedHeaderSize >= 1) {
+                if (extendedHeaderSize >= 1) {
                     byte flags = reader.readByte();
                     m_expandedByDefault = flags & 0x80;
                     extendedHeaderSize -= 1;
@@ -226,7 +228,7 @@ NodeEntry::NodeEntry(istream &stream) :
                 m_extendedData = reader.readString(extendedHeaderSize);
             }
             uint32 childCount = reader.readUInt32BE();
-            for(uint32 i = 0; i < childCount; ++i) {
+            for (uint32 i = 0; i < childCount; ++i) {
                 Entry::parse(stream)->setParent(this);
             }
         } else {
@@ -242,10 +244,10 @@ NodeEntry::NodeEntry(istream &stream) :
  * \remarks The copy will be parentless and thus not be embedded in the hierarchy
  *          of \a other. Child entries will be copied as well.
  */
-NodeEntry::NodeEntry(const NodeEntry &other) :
-    Entry(other)
+NodeEntry::NodeEntry(const NodeEntry &other)
+    : Entry(other)
 {
-    for(Entry *otherChild : other.m_children) {
+    for (Entry *otherChild : other.m_children) {
         Entry *clonedChild = otherChild->clone();
         clonedChild->m_parent = this;
         clonedChild->m_index = m_children.size();
@@ -258,7 +260,7 @@ NodeEntry::NodeEntry(const NodeEntry &other) :
  */
 NodeEntry::~NodeEntry()
 {
-    for(Entry *child : m_children) {
+    for (Entry *child : m_children) {
         child->m_parent = nullptr;
         delete child;
     }
@@ -273,7 +275,7 @@ void NodeEntry::deleteChildren(int begin, int end)
 {
     auto iterator = m_children.cbegin() + begin;
     auto endIterator = m_children.begin() + end;
-    for(; iterator < endIterator; ++iterator) {
+    for (; iterator < endIterator; ++iterator) {
         (*iterator)->m_parent = nullptr;
         delete *iterator;
     }
@@ -285,7 +287,7 @@ void NodeEntry::deleteChildren(int begin, int end)
  */
 void NodeEntry::replaceChild(size_t at, Entry *newChild)
 {
-    if(at < m_children.size()) {
+    if (at < m_children.size()) {
         m_children.at(at)->m_parent = nullptr;
         m_children[at] = newChild;
     }
@@ -302,30 +304,30 @@ void NodeEntry::replaceChild(size_t at, Entry *newChild)
  */
 Entry *NodeEntry::entryByPath(list<string> &path, bool includeThis, EntryType *creationType)
 {
-    if(path.size()) {
-        if(includeThis) {
-            if(path.front() == label()) {
+    if (path.size()) {
+        if (includeThis) {
+            if (path.front() == label()) {
                 path.pop_front();
             } else {
                 return nullptr;
             }
         }
-        if(path.size()) {
-            for(Entry *child : m_children) {
-                if(path.front() == child->label()) {
+        if (path.size()) {
+            for (Entry *child : m_children) {
+                if (path.front() == child->label()) {
                     path.pop_front();
-                    if(path.empty()) {
+                    if (path.empty()) {
                         return child;
-                    } else if(child->type() == EntryType::Node) {
+                    } else if (child->type() == EntryType::Node) {
                         return static_cast<NodeEntry *>(child)->entryByPath(path, false, creationType);
                     } else {
                         return nullptr; // can not resolve path since an account entry can not have children
                     }
                 }
             }
-            if(creationType) {
-                if(path.size() == 1) {
-                    switch(*creationType) {
+            if (creationType) {
+                if (path.size() == 1) {
+                    switch (*creationType) {
                     case EntryType::Account:
                         return new AccountEntry(path.front(), this);
                     case EntryType::Node:
@@ -347,17 +349,17 @@ void NodeEntry::make(ostream &stream) const
     BinaryWriter writer(&stream);
     writer.writeByte(isExpandedByDefault() && m_extendedData.empty() ? 0x0 : 0x1); // version
     writer.writeLengthPrefixedString(label());
-    if(!isExpandedByDefault() || !m_extendedData.empty()) {
+    if (!isExpandedByDefault() || !m_extendedData.empty()) {
         writer.writeUInt16BE(1 + m_extendedData.size()); // extended header is 1 byte long
         byte flags = 0x00;
-        if(isExpandedByDefault()) {
+        if (isExpandedByDefault()) {
             flags |= 0x80;
         }
         writer.writeByte(flags);
         writer.writeString(m_extendedData);
     }
     writer.writeUInt32BE(m_children.size());
-    for(const Entry *child : m_children) {
+    for (const Entry *child : m_children) {
         child->make(stream);
     }
 }
@@ -373,14 +375,16 @@ NodeEntry *NodeEntry::clone() const
  */
 
 AccountEntry::AccountEntry()
-{}
+{
+}
 
 /*!
  * \brief Constructs a new account entry with the specified \a label and \a parent.
  */
-AccountEntry::AccountEntry(const string &label, NodeEntry *parent) :
-    Entry(label, parent)
-{}
+AccountEntry::AccountEntry(const string &label, NodeEntry *parent)
+    : Entry(label, parent)
+{
+}
 
 /*!
  * \brief Constructs a new account entry which is deserialized from the specified \a stream.
@@ -389,17 +393,17 @@ AccountEntry::AccountEntry(istream &stream)
 {
     BinaryReader reader(&stream);
     byte version = reader.readByte();
-    if(!denotesNodeEntry(version)) {
+    if (!denotesNodeEntry(version)) {
         version ^= 0x80; // set bit 0 to false
-        if(version == 0x0 || version == 0x1) {
+        if (version == 0x0 || version == 0x1) {
             setLabel(reader.readLengthPrefixedString());
-            if(version == 0x1) { // version 0x1 has an extended header
+            if (version == 0x1) { // version 0x1 has an extended header
                 uint16 extendedHeaderSize = reader.readUInt16BE();
                 // currently there's nothing to read here
                 m_extendedData = reader.readString(extendedHeaderSize);
             }
             uint32 fieldCount = reader.readUInt32BE();
-            for(uint32 i = 0; i < fieldCount; ++i) {
+            for (uint32 i = 0; i < fieldCount; ++i) {
                 m_fields.push_back(Field(this, stream));
             }
         } else {
@@ -415,8 +419,8 @@ AccountEntry::AccountEntry(istream &stream)
  * \remarks The copy will be parentless and thus not be embedded in the hierarchy
  *          of \a other. Child entries will be copied as well.
  */
-AccountEntry::AccountEntry(const AccountEntry &other) :
-    Entry(other)
+AccountEntry::AccountEntry(const AccountEntry &other)
+    : Entry(other)
 {
     m_fields = other.m_fields;
 }
@@ -425,19 +429,20 @@ AccountEntry::AccountEntry(const AccountEntry &other) :
  * \brief Destroys the entry.
  */
 AccountEntry::~AccountEntry()
-{}
+{
+}
 
 void AccountEntry::make(ostream &stream) const
 {
     BinaryWriter writer(&stream);
     writer.writeByte(0x80 | (m_extendedData.empty() ? 0x0 : 0x1)); // version
     writer.writeLengthPrefixedString(label());
-    if(!m_extendedData.empty()) {
+    if (!m_extendedData.empty()) {
         writer.writeUInt16BE(m_extendedData.size());
         writer.writeString(m_extendedData);
     }
     writer.writeUInt32BE(m_fields.size());
-    for(const Field &field : m_fields) {
+    for (const Field &field : m_fields) {
         field.make(stream);
     }
 }
@@ -446,5 +451,4 @@ AccountEntry *AccountEntry::clone() const
 {
     return new AccountEntry(*this);
 }
-
 }

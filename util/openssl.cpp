@@ -35,7 +35,5 @@ void clean()
     // remove error strings
     ERR_free_strings();
 }
-
 }
-
 }
