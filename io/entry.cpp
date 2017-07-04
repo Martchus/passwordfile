@@ -38,7 +38,7 @@ Entry::Entry(const string &label, NodeEntry *parent)
 }
 
 /*!
- * \brief Constructs a copy of the another entry.
+ * \brief Constructs a copy of another entry.
  * \remarks The copy will be parentless and thus not be embedded in the hierarchy
  *          of \a other. Child entries will be copied as well.
  */
