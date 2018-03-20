@@ -59,4 +59,4 @@ bool OpenSslRandomDevice::status() const
 {
     return RAND_status();
 }
-}
+} // namespace Util

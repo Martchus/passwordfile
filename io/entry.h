@@ -174,6 +174,6 @@ inline std::vector<Field> &AccountEntry::fields()
 {
     return m_fields;
 }
-}
+} // namespace Io
 
 #endif // ENTRY_H

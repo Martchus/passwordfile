@@ -13,6 +13,6 @@ public:
     uint32 operator()() const;
     bool status() const;
 };
-}
+} // namespace Util
 
 #endif // OPENSSLRANDOMDEVICE_H

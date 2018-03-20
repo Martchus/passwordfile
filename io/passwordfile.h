@@ -54,6 +54,6 @@ private:
     IoUtilities::BinaryReader m_freader;
     IoUtilities::BinaryWriter m_fwriter;
 };
-}
+} // namespace Io
 
 #endif // PASSWORDFILE_H

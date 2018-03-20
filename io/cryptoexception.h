@@ -13,6 +13,6 @@ public:
     CryptoException(const std::string &openSslErrorQueue) noexcept;
     ~CryptoException() noexcept;
 };
-}
+} // namespace Io
 
 #endif // CRYPTOFAILUREEXCEPTION_H

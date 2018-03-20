@@ -21,4 +21,4 @@ ParsingException::ParsingException(const std::string &message) noexcept
 ParsingException::~ParsingException() noexcept
 {
 }
-}
+} // namespace Io

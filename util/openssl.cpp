@@ -35,5 +35,5 @@ void clean()
     // remove error strings
     ERR_free_strings();
 }
-}
-}
+} // namespace OpenSsl
+} // namespace Util

@@ -570,4 +570,4 @@ size_t PasswordFile::size()
     m_file.seekg(0, ios::end);
     return m_file.tellg();
 }
-}
+} // namespace Io

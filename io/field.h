@@ -109,6 +109,6 @@ inline bool Field::isValidType(int number)
 {
     return number >= 0 && number <= 1;
 }
-}
+} // namespace Io
 
 #endif // FIELD_H

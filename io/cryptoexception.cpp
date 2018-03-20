@@ -20,4 +20,4 @@ CryptoException::CryptoException(const std::string &openSslErrorQueue) noexcept
 CryptoException::~CryptoException() noexcept
 {
 }
-}
+} // namespace Io

@@ -72,4 +72,4 @@ void Field::make(ostream &stream) const
         writer.writeString(m_extendedData);
     }
 }
-}
+} // namespace Io

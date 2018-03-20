@@ -13,6 +13,6 @@ public:
     ParsingException(const std::string &message = std::string()) noexcept;
     ~ParsingException() noexcept;
 };
-}
+} // namespace Io
 
 #endif // PARSINGEXCEPTION_H

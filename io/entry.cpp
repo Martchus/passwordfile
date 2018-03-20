@@ -451,4 +451,4 @@ AccountEntry *AccountEntry::clone() const
 {
     return new AccountEntry(*this);
 }
-}
+} // namespace Io
