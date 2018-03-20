@@ -10,8 +10,8 @@ namespace Io {
 
 class PASSWORD_FILE_EXPORT CryptoException : public std::runtime_error {
 public:
-    CryptoException(const std::string &openSslErrorQueue) USE_NOTHROW;
-    virtual ~CryptoException() USE_NOTHROW;
+    CryptoException(const std::string &openSslErrorQueue) noexcept;
+    ~CryptoException() noexcept;
 };
 }
 

@@ -9,14 +9,15 @@ namespace Io {
 /*!
  * \brief Constructs a crypto exception.
  */
-CryptoException::CryptoException(const std::string &openSslErrorQueue) USE_NOTHROW : runtime_error(openSslErrorQueue)
+CryptoException::CryptoException(const std::string &openSslErrorQueue) noexcept
+    : runtime_error(openSslErrorQueue)
 {
 }
 
 /*!
  * \brief Destroys the exception.
  */
-CryptoException::~CryptoException() USE_NOTHROW
+CryptoException::~CryptoException() noexcept
 {
 }
 }
