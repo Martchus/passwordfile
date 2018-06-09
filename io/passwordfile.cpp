@@ -252,8 +252,8 @@ void PasswordFile::load()
  * \param useEncryption Specifies whether encryption should be used.
  * \param useCompression Specifies whether compression should be used.
  * \throws Throws ios_base::failure when an IO error occurs.
- * \throws Throws runtime_error when no root entry is present.
- * \throws Throws Io::CryptoException when a decryption error occurs.
+ * \throws Throws runtime_error when no root entry is present or a compression error occurs.
+ * \throws Throws Io::CryptoException when an encryption error occurs.
  */
 void PasswordFile::save(bool useEncryption, bool useCompression)
 {
@@ -306,9 +306,9 @@ void PasswordFile::save(bool useEncryption, bool useCompression)
         ConversionUtilities::LE::getBytes(static_cast<uint64>(size), encbuff.data());
         switch (compress(reinterpret_cast<Bytef *>(encbuff.data() + 8), &compressedSize, reinterpret_cast<Bytef *>(decbuff.data()), size)) {
         case Z_MEM_ERROR:
-            throw runtime_error("Decompressing failed. The source buffer was too small.");
+            throw runtime_error("Compressing failed. The source buffer was too small.");
         case Z_BUF_ERROR:
-            throw runtime_error("Decompressing failed. The destination buffer was too small.");
+            throw runtime_error("Compressing failed. The destination buffer was too small.");
         case Z_OK:
             encbuff.swap(decbuff); // decompression successful
             size = 8 + compressedSize;
