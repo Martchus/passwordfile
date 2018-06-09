@@ -1,5 +1,5 @@
-#ifndef OPENSSLRANDOMDEVICE_H
-#define OPENSSLRANDOMDEVICE_H
+#ifndef PASSWORD_FILE_UTIL_OPENSSLRANDOMDEVICE_H
+#define PASSWORD_FILE_UTIL_OPENSSLRANDOMDEVICE_H
 
 #include "../global.h"
 
@@ -32,4 +32,4 @@ constexpr OpenSslRandomDevice::result_type OpenSslRandomDevice::max()
 
 } // namespace Util
 
-#endif // OPENSSLRANDOMDEVICE_H
+#endif // PASSWORD_FILE_UTIL_OPENSSLRANDOMDEVICE_H

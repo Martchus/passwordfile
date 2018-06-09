@@ -1,4 +1,4 @@
-#ifndef OPENSSL_H
+#ifndef PASSWORD_FILE_UTIL_OPENSSL_H
 #define OPENSSL_H
 
 #include "../global.h"
@@ -12,4 +12,4 @@ void PASSWORD_FILE_EXPORT clean();
 } // namespace OpenSsl
 } // namespace Util
 
-#endif // OPENSSL_H
+#endif // PASSWORD_FILE_UTIL_OPENSSL_H

@@ -1,5 +1,5 @@
-#ifndef PARSINGEXCEPTION_H
-#define PARSINGEXCEPTION_H
+#ifndef PASSWORD_FILE_IO_PARSINGEXCEPTION_H
+#define PASSWORD_FILE_IO_PARSINGEXCEPTION_H
 
 #include "../global.h"
 
@@ -15,4 +15,4 @@ public:
 };
 } // namespace Io
 
-#endif // PARSINGEXCEPTION_H
+#endif // PASSWORD_FILE_IO_PARSINGEXCEPTION_H

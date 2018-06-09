@@ -1,5 +1,5 @@
-#ifndef ENTRY_H
-#define ENTRY_H
+#ifndef PASSWORD_FILE_IO_ENTRY_H
+#define PASSWORD_FILE_IO_ENTRY_H
 
 #include "./field.h"
 
@@ -182,4 +182,4 @@ inline std::vector<Field> &AccountEntry::fields()
 }
 } // namespace Io
 
-#endif // ENTRY_H
+#endif // PASSWORD_FILE_IO_ENTRY_H

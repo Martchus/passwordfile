@@ -1,5 +1,5 @@
-#ifndef FIELD_H
-#define FIELD_H
+#ifndef PASSWORD_FILE_IO_FIELD_H
+#define PASSWORD_FILE_IO_FIELD_H
 
 #include "../global.h"
 
@@ -111,4 +111,4 @@ inline bool Field::isValidType(int number)
 }
 } // namespace Io
 
-#endif // FIELD_H
+#endif // PASSWORD_FILE_IO_FIELD_H

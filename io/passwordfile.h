@@ -1,5 +1,5 @@
-#ifndef PASSWORDFILE_H
-#define PASSWORDFILE_H
+#ifndef PASSWORD_FILE_IO_PASSWORD_FILE_H
+#define PASSWORD_FILE_IO_PASSWORD_FILE_H
 
 #include "../global.h"
 
@@ -57,4 +57,4 @@ private:
 };
 } // namespace Io
 
-#endif // PASSWORDFILE_H
+#endif // PASSWORD_FILE_IO_PASSWORD_FILE_H
