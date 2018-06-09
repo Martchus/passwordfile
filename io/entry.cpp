@@ -347,6 +347,7 @@ void NodeEntry::replaceChild(size_t at, Entry *newChild)
  *                     if the entry specified by the provided \a path does not exist. The parent of the entry
  *                     to be created must exist. Specify nullptr if no entries should be created (default).
  * \returns Returns the entry if found (or created); otherwise nullptr is returned.
+ * \todo Use dedicated flags or at least make \a creationType const in v4.
  */
 Entry *NodeEntry::entryByPath(list<string> &path, bool includeThis, EntryType *creationType)
 {
