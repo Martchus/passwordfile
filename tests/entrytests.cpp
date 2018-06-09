@@ -1,22 +1,9 @@
-#include "../io/cryptoexception.h"
 #include "../io/entry.h"
-#include "../io/passwordfile.h"
 
-#include <c++utilities/conversion/stringconversion.h>
-#include <c++utilities/misc/traits.h>
-
-namespace TestUtilities {
-
-inline std::ostream &operator<<(std::ostream &out, const Io::Entry *entry)
-{
-    return out << ConversionUtilities::joinStrings(entry->path(), "/");
-}
-
-} // namespace TestUtilities
-
-using namespace TestUtilities;
+#include "./utils.h"
 
 #include <c++utilities/tests/testutils.h>
+using namespace TestUtilities;
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>

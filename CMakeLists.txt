@@ -24,8 +24,10 @@ set(TEST_HEADER_FILES
 )
 set(TEST_SRC_FILES
     tests/cppunit.cpp
+    tests/utils.h
     tests/passwordfiletests.cpp
     tests/entrytests.cpp
+    tests/fieldtests.cpp
     tests/opensslrandomdevice.cpp
 )
 
