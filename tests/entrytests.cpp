@@ -35,6 +35,7 @@ class EntryTests : public TestFixture {
     CPPUNIT_TEST(testNewEntryCorrectlyInitialized);
     CPPUNIT_TEST(testNesting);
     CPPUNIT_TEST(testEntryByPath);
+    CPPUNIT_TEST(testUniqueLabels);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -44,6 +45,7 @@ public:
     void testNewEntryCorrectlyInitialized();
     void testNesting();
     void testEntryByPath();
+    void testUniqueLabels();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(EntryTests);
@@ -195,4 +197,15 @@ void EntryTests::testEntryByPath()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("label assigned", "foo"s, nestedAccount->label());
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
         "path actually correct", list<string>{ "root" CPP_UTILITIES_PP_COMMA "node" CPP_UTILITIES_PP_COMMA "foo" }, nestedAccount->path());
+}
+
+void EntryTests::testUniqueLabels()
+{
+    NodeEntry root("root");
+    const auto *const fooEntry = new AccountEntry("foo", &root);
+    VAR_UNUSED(fooEntry)
+    const auto *const foo2Entry = new AccountEntry("foo", &root);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("2nd foo renamed to foo 2", "foo 2"s, foo2Entry->label());
+    const auto *const foo3Entry = new AccountEntry("foo", &root);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("3rd foo renamed to foo 3", "foo 3"s, foo3Entry->label());
 }

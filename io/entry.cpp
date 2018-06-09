@@ -1,6 +1,7 @@
 #include "./entry.h"
 #include "./parsingexception.h"
 
+#include <c++utilities/conversion/stringbuilder.h>
 #include <c++utilities/io/binaryreader.h>
 #include <c++utilities/io/binarywriter.h>
 
@@ -58,7 +59,7 @@ Entry::~Entry()
 }
 
 /*!
- * \brief Internally called to make the label unique.
+ * \brief Internally called to make the entry's label unique within the parent.
  * \sa setLabel()
  */
 void Entry::makeLabelUnique()
@@ -66,23 +67,22 @@ void Entry::makeLabelUnique()
     if (!m_parent) {
         return;
     }
-    int index = 1;
-    string currentLabel(label());
-checkLabel:
-    for (Entry *sibling : m_parent->children()) {
-        if (sibling == this || currentLabel != sibling->label()) {
-            continue;
+    string newLabel(label());
+    for (unsigned int index = 2;; ++index) {
+        bool needsNewLabel = false;
+        for (Entry *const sibling : m_parent->children()) {
+            if (sibling == this || newLabel != sibling->label()) {
+                continue;
+            }
+            needsNewLabel = true;
+            newLabel = argsToString(label(), ' ', index);
+            break;
         }
-        stringstream newLabel(currentLabel);
-        newLabel.seekp(0, ios_base::end);
-        if (newLabel.tellp()) {
-            newLabel << ' ';
+        if (!needsNewLabel) {
+            break;
         }
-        newLabel << ++index;
-        currentLabel = newLabel.str();
-        goto checkLabel;
     }
-    m_label = currentLabel;
+    m_label.swap(newLabel);
 }
 
 /*!
