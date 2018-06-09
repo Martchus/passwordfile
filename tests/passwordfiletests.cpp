@@ -63,7 +63,7 @@ void PasswordFileTests::testReading(
     file.setPath(testfile1path);
     file.open(true);
 
-    CPPUNIT_ASSERT(file.isEncryptionUsed() == !testfile1password.empty());
+    CPPUNIT_ASSERT_EQUAL(!testfile1password.empty(), file.isEncryptionUsed());
     // attempt to decrypt using a wrong password
     file.setPassword(testfile1password + "asdf");
     if (!testfile1password.empty()) {
@@ -73,33 +73,33 @@ void PasswordFileTests::testReading(
     file.setPassword(testfile1password);
     file.load();
     // test root entry
-    const NodeEntry *rootEntry = file.rootEntry();
+    const NodeEntry *const rootEntry = file.rootEntry();
     CPPUNIT_ASSERT_EQUAL("testfile1"s, rootEntry->label());
     CPPUNIT_ASSERT_EQUAL(4_st, rootEntry->children().size());
 
     // test testaccount1
     CPPUNIT_ASSERT_EQUAL("testaccount1"s, rootEntry->children()[0]->label());
-    CPPUNIT_ASSERT(rootEntry->children()[0]->type() == EntryType::Account);
+    CPPUNIT_ASSERT_EQUAL(EntryType::Account, rootEntry->children()[0]->type());
     CPPUNIT_ASSERT_EQUAL("pin"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).name());
     CPPUNIT_ASSERT_EQUAL("123456"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).value());
-    CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).type() == FieldType::Password);
+    CPPUNIT_ASSERT_EQUAL(FieldType::Password, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).type());
     CPPUNIT_ASSERT(
         static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).tiedAccount() == static_cast<AccountEntry *>(rootEntry->children()[0]));
-    CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(1).type() == FieldType::Normal);
+    CPPUNIT_ASSERT_EQUAL(FieldType::Normal, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(1).type());
     CPPUNIT_ASSERT_THROW(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(2), out_of_range);
 
     // test testaccount2
     CPPUNIT_ASSERT_EQUAL("testaccount2"s, rootEntry->children()[1]->label());
-    CPPUNIT_ASSERT(rootEntry->children()[1]->type() == EntryType::Account);
-    CPPUNIT_ASSERT(static_cast<AccountEntry *>(rootEntry->children()[1])->fields().empty());
+    CPPUNIT_ASSERT_EQUAL(EntryType::Account, rootEntry->children()[1]->type());
+    CPPUNIT_ASSERT_EQUAL(0_st, static_cast<AccountEntry *>(rootEntry->children()[1])->fields().size());
 
     // test testcategory1
     CPPUNIT_ASSERT_EQUAL("testcategory1"s, rootEntry->children()[2]->label());
-    CPPUNIT_ASSERT(rootEntry->children()[2]->type() == EntryType::Node);
-    const NodeEntry *category = static_cast<NodeEntry *>(rootEntry->children()[2]);
-    CPPUNIT_ASSERT(category->children().size() == 3);
-    CPPUNIT_ASSERT(category->children()[2]->type() == EntryType::Node);
-    CPPUNIT_ASSERT(static_cast<NodeEntry *>(category->children()[2])->children().size() == 2);
+    CPPUNIT_ASSERT_EQUAL(EntryType::Node, rootEntry->children()[2]->type());
+    const NodeEntry *const category = static_cast<NodeEntry *>(rootEntry->children()[2]);
+    CPPUNIT_ASSERT_EQUAL(3_st, category->children().size());
+    CPPUNIT_ASSERT_EQUAL(EntryType::Node, category->children()[2]->type());
+    CPPUNIT_ASSERT_EQUAL(2_st, static_cast<NodeEntry *>(category->children()[2])->children().size());
 
     // test testaccount3
     CPPUNIT_ASSERT_EQUAL("testaccount3"s, rootEntry->children()[3]->label());
@@ -108,17 +108,17 @@ void PasswordFileTests::testReading(
     file.setPath(testfile2);
     file.open(true);
 
-    CPPUNIT_ASSERT(file.isEncryptionUsed() == !testfile2password.empty());
+    CPPUNIT_ASSERT_EQUAL(!testfile2password.empty(), file.isEncryptionUsed());
     file.setPassword(testfile2password);
     file.load();
-    rootEntry = file.rootEntry();
+    const NodeEntry *const rootEntry2 = file.rootEntry();
     if (testfile2Mod) {
-        CPPUNIT_ASSERT(rootEntry->label() == "testfile2 - modified");
-        CPPUNIT_ASSERT(rootEntry->children().size() == 2);
-        CPPUNIT_ASSERT(rootEntry->children()[1]->label() == "newAccount");
+        CPPUNIT_ASSERT_EQUAL("testfile2 - modified"s, rootEntry2->label());
+        CPPUNIT_ASSERT_EQUAL(2_st, rootEntry2->children().size());
+        CPPUNIT_ASSERT_EQUAL("newAccount"s, rootEntry2->children()[1]->label());
     } else {
-        CPPUNIT_ASSERT(rootEntry->label() == "testfile2");
-        CPPUNIT_ASSERT(rootEntry->children().size() == 1);
+        CPPUNIT_ASSERT_EQUAL("testfile2"s, rootEntry2->label());
+        CPPUNIT_ASSERT_EQUAL(1_st, rootEntry2->children().size());
     }
 }
 
@@ -128,8 +128,8 @@ void PasswordFileTests::testReading(
  */
 void PasswordFileTests::testWriting()
 {
-    string testfile1 = TestUtilities::workingCopyPath("testfile1.pwmgr");
-    string testfile2 = TestUtilities::workingCopyPath("testfile2.pwmgr");
+    const string testfile1 = TestUtilities::workingCopyPath("testfile1.pwmgr");
+    const string testfile2 = TestUtilities::workingCopyPath("testfile2.pwmgr");
     PasswordFile file;
 
     // resave testfile 1
