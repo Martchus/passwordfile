@@ -317,10 +317,26 @@ void NodeEntry::deleteChildren(int begin, int end)
  */
 void NodeEntry::replaceChild(size_t at, Entry *newChild)
 {
-    if (at < m_children.size()) {
-        m_children.at(at)->m_parent = nullptr;
-        m_children[at] = newChild;
+    if (at >= m_children.size()) {
+        return;
     }
+
+    // detatch the old child
+    m_children[at]->m_parent = nullptr;
+    m_children[at]->m_index = -1;
+
+    // detach new child from its previous parent
+    if (auto *newChildOldParent = newChild->m_parent) {
+        newChildOldParent->m_children.erase(newChildOldParent->m_children.begin() + newChild->m_index);
+        for (auto i = newChildOldParent->m_children.begin() + newChild->m_index; i < newChildOldParent->m_children.end(); ++i) {
+            (*i)->m_index -= 1;
+        }
+    }
+
+    // do the actual assignment
+    newChild->m_parent = this;
+    newChild->m_index = at;
+    m_children[at] = newChild;
 }
 
 /*!
