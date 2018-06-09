@@ -26,6 +26,7 @@ public:
     void create();
     void close();
     void load();
+    // FIXME: use flags in v4
     void save(bool useEncryption = true, bool useCompression = true);
     void clearEntries();
     void clear();

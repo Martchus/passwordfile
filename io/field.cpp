@@ -36,25 +36,24 @@ Field::Field(AccountEntry *tiedAccount, const string &name, const string &value)
 Field::Field(AccountEntry *tiedAccount, istream &stream)
 {
     BinaryReader reader(&stream);
-    int version = reader.readByte();
-    if (version == 0x0 || version == 0x1) {
-        m_name = reader.readLengthPrefixedString();
-        m_value = reader.readLengthPrefixedString();
-        byte type = reader.readByte();
-        if (isValidType(type)) {
-            m_type = static_cast<FieldType>(type);
-        } else {
-            throw ParsingException("Field type is not supported.");
-        }
-        if (version == 0x1) { // version 0x1 has an extended header
-            uint16 extendedHeaderSize = reader.readUInt16BE();
-            // currently there's nothing to read here
-            m_extendedData = reader.readString(extendedHeaderSize);
-        }
-        m_tiedAccount = tiedAccount;
-    } else {
+    const int version = reader.readByte();
+    if (version != 0x0 && version != 0x1) {
         throw ParsingException("Field version is not supported.");
     }
+    m_name = reader.readLengthPrefixedString();
+    m_value = reader.readLengthPrefixedString();
+    byte type = reader.readByte();
+    if (!isValidType(type)) {
+        throw ParsingException("Field type is not supported.");
+    }
+    m_type = static_cast<FieldType>(type);
+    // read extended header for version 0x1
+    if (version == 0x1) {
+        const uint16 extendedHeaderSize = reader.readUInt16BE();
+        // currently there's nothing to read here
+        m_extendedData = reader.readString(extendedHeaderSize);
+    }
+    m_tiedAccount = tiedAccount;
 }
 
 /*!

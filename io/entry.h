@@ -42,6 +42,7 @@ public:
     virtual Entry *clone() const = 0;
     static Entry *parse(std::istream &stream);
     static bool denotesNodeEntry(byte version);
+    static constexpr EntryType denotedEntryType(byte version);
 
 protected:
     Entry(const std::string &label = std::string(), NodeEntry *parent = nullptr);
@@ -105,7 +106,7 @@ public:
     virtual EntryType type() const;
     const std::vector<Entry *> &children() const;
     void deleteChildren(int begin, int end);
-    void replaceChild(size_t at, Entry *newChild);
+    void replaceChild(std::size_t at, Entry *newChild);
     Entry *entryByPath(std::list<std::string> &path, bool includeThis = true, EntryType *creationType = nullptr);
     bool isExpandedByDefault() const;
     void setExpandedByDefault(bool expandedByDefault);
@@ -140,6 +141,11 @@ inline void NodeEntry::setExpandedByDefault(bool expandedByDefault)
 inline bool Entry::denotesNodeEntry(byte version)
 {
     return (version & 0x80) == 0;
+}
+
+constexpr EntryType Entry::denotedEntryType(byte version)
+{
+    return (version & 0x80) == 0 ? EntryType::Node : EntryType::Account;
 }
 
 class PASSWORD_FILE_EXPORT AccountEntry : public Entry {
