@@ -290,13 +290,22 @@ NodeEntry::~NodeEntry()
  */
 void NodeEntry::deleteChildren(int begin, int end)
 {
-    auto iterator = m_children.cbegin() + begin;
-    auto endIterator = m_children.begin() + end;
-    for (; iterator < endIterator; ++iterator) {
+    const auto endIterator = m_children.begin() + end;
+
+    // delete the children
+    for (auto iterator = m_children.cbegin() + begin; iterator != endIterator; ++iterator) {
         (*iterator)->m_parent = nullptr;
         delete *iterator;
     }
+
+    // remove the children from the list
     m_children.erase(m_children.begin() + begin, endIterator);
+
+    // adjust indices of subsequent children
+    const int diff = end - begin;
+    for (auto iterator = m_children.begin() + begin, end = m_children.end(); iterator != end; ++iterator) {
+        (*iterator)->m_index -= diff;
+    }
 }
 
 /*!
