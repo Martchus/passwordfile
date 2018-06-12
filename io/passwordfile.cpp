@@ -3,6 +3,7 @@
 #include "./entry.h"
 #include "./parsingexception.h"
 
+#include <c++utilities/conversion/stringconversion.h>
 #include <c++utilities/io/catchiofailure.h>
 
 #include <openssl/conf.h>
@@ -485,12 +486,17 @@ const string &PasswordFile::path() const
 }
 
 /*!
- * \brief Sets the current file path. Causes the file to be closed if currently opened.
+ * \brief Sets the current file path. Closes the file if currently opened.
  */
 void PasswordFile::setPath(const string &value)
 {
     close();
     m_path = value;
+
+    // support "file://" protocol
+    if (ConversionUtilities::startsWith(m_path, "file:")) {
+        m_path = m_path.substr(5);
+    }
 }
 
 /*!
