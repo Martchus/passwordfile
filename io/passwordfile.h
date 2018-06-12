@@ -43,7 +43,7 @@ public:
     void clearPassword();
     bool isEncryptionUsed();
     bool isOpen() const;
-    size_t size();
+    std::size_t size();
 
 private:
     std::string m_path;
