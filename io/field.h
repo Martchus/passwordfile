@@ -14,6 +14,7 @@ class AccountEntry;
 
 class PASSWORD_FILE_EXPORT Field {
 public:
+    Field();
     Field(AccountEntry *tiedAccount, const std::string &name = std::string(), const std::string &value = std::string());
     Field(AccountEntry *tiedAccount, std::istream &stream);
 
@@ -37,6 +38,12 @@ private:
 protected:
     std::string m_extendedData;
 };
+
+inline Field::Field()
+    : m_type(FieldType::Normal)
+    , m_tiedAccount(nullptr)
+{
+}
 
 /*!
  * \brief Returns an indication whether the entry is empty.

@@ -136,6 +136,7 @@ void Entry::setParent(NodeEntry *parent, int index)
 
 /*!
  * \brief Returns an indication whether the instance is an indirect child of the specified \a entry.
+ * \todo Make \a entry const in v4.
  */
 bool Entry::isIndirectChildOf(NodeEntry *entry) const
 {
