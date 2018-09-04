@@ -21,6 +21,7 @@ public:
     explicit PasswordFile();
     explicit PasswordFile(const std::string &path, const std::string &password);
     PasswordFile(const PasswordFile &other);
+    PasswordFile(PasswordFile &&other);
     ~PasswordFile();
     void open(bool readOnly = false);
     void generateRootEntry();

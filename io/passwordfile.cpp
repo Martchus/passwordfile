@@ -60,11 +60,28 @@ PasswordFile::PasswordFile(const string &path, const string &password)
  */
 PasswordFile::PasswordFile(const PasswordFile &other)
     : m_path(other.m_path)
+    , m_rootEntry(other.m_rootEntry ? make_unique<NodeEntry>(*other.m_rootEntry) : nullptr)
+    , m_extendedHeader(other.m_extendedHeader)
+    , m_encryptedExtendedHeader(other.m_encryptedExtendedHeader)
     , m_freader(BinaryReader(&m_file))
     , m_fwriter(BinaryWriter(&m_file))
 {
     m_file.exceptions(ios_base::failbit | ios_base::badbit);
-    setPath(other.path());
+    memcpy(m_password, other.m_password, 32);
+}
+
+/*!
+ * \brief Moves the password file.
+ */
+PasswordFile::PasswordFile(PasswordFile &&other)
+    : m_path(move(other.m_path))
+    , m_rootEntry(move(other.m_rootEntry))
+    , m_extendedHeader(move(other.m_extendedHeader))
+    , m_encryptedExtendedHeader(move(other.m_encryptedExtendedHeader))
+    , m_file(move(other.m_file))
+    , m_freader(BinaryReader(&m_file))
+    , m_fwriter(BinaryWriter(&m_file))
+{
     memcpy(m_password, other.m_password, 32);
 }
 
@@ -73,7 +90,6 @@ PasswordFile::PasswordFile(const PasswordFile &other)
  */
 PasswordFile::~PasswordFile()
 {
-    close();
 }
 
 /*!
