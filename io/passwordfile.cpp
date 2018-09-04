@@ -103,6 +103,16 @@ void PasswordFile::open(bool readOnly)
         throwIoFailure("Unable to open file because path is emtpy.");
     }
     m_file.open(m_path, readOnly ? ios_base::in | ios_base::binary : ios_base::in | ios_base::out | ios_base::binary);
+    opened();
+}
+
+/*!
+ * \brief Handles the file being opened.
+ *
+ * Call this method after opening a file directly via the underlying fileStream().
+ */
+void PasswordFile::opened()
+{
     m_file.seekg(0, ios_base::end);
     if (m_file.tellg() == 0) {
         throwIoFailure("File is empty.");

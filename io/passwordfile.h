@@ -23,7 +23,9 @@ public:
     PasswordFile(const PasswordFile &other);
     PasswordFile(PasswordFile &&other);
     ~PasswordFile();
+    IoUtilities::NativeFileStream &fileStream();
     void open(bool readOnly = false);
+    void opened();
     void generateRootEntry();
     void create();
     void close();
@@ -57,6 +59,15 @@ private:
     IoUtilities::BinaryReader m_freader;
     IoUtilities::BinaryWriter m_fwriter;
 };
+
+/*!
+ * \brief Returns the underlying file stream.
+ */
+inline IoUtilities::NativeFileStream &PasswordFile::fileStream()
+{
+    return m_file;
+}
+
 } // namespace Io
 
 #endif // PASSWORD_FILE_IO_PASSWORD_FILE_H
