@@ -94,7 +94,7 @@ void Entry::makeLabelUnique()
  * \remarks
  * - The label might be adjusted to be unique within the new parent.
  * - If the entry is just moved within its current parent (\a parent equals parent()), the
- *   specified \a index refers doesn't take the entry itself into account as it is removed from
+ *   specified \a index doesn't take the entry itself into account as it is removed from
  *   the children of \a parent and then re-inserted at \a index.
  */
 void Entry::setParent(NodeEntry *parent, int index)
