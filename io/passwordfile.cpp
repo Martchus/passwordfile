@@ -275,7 +275,7 @@ void PasswordFile::load()
 }
 
 /*!
- * \brief Writes the current root entry to the file.
+ * \brief Writes the current root entry to the file under path() replacing its previous contents.
  * \param useEncryption Specifies whether encryption should be used.
  * \param useCompression Specifies whether compression should be used.
  * \throws Throws ios_base::failure when an IO error occurs.
@@ -287,14 +287,37 @@ void PasswordFile::save(bool useEncryption, bool useCompression)
     if (!m_rootEntry) {
         throw runtime_error("Root entry has not been created.");
     }
-    // open file
-    if (m_file.is_open()) {
+
+    // use already opened and writable file; otherwise re-open the file
+    if (m_file.good() && m_file.is_open() && (m_file.flags() & ios_base::out)) {
+        m_file.seekp(0);
+    } else {
         m_file.close();
         m_file.clear();
+        m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
     }
-    m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
-    // write header
-    m_fwriter.writeUInt32LE(0x7770616DU); // write magic number
+
+    write(useEncryption, useCompression);
+    m_file.flush();
+}
+
+/*!
+ * \brief Writes the current root entry to the file which is assumed to be opened and writeable.
+ * \param useEncryption Specifies whether encryption should be used.
+ * \param useCompression Specifies whether compression should be used.
+ * \throws Throws ios_base::failure when an IO error occurs.
+ * \throws Throws runtime_error when no root entry is present or a compression error occurs.
+ * \throws Throws Io::CryptoException when an encryption error occurs.
+ */
+void PasswordFile::write(bool useEncryption, bool useCompression)
+{
+    if (!m_rootEntry) {
+        throw runtime_error("Root entry has not been created.");
+    }
+
+    // write magic number
+    m_fwriter.writeUInt32LE(0x7770616DU);
+
     // write version, extended header requires version 4, encrypted extended header required version 5
     m_fwriter.writeUInt32LE(m_extendedHeader.empty() && m_encryptedExtendedHeader.empty() ? 0x3U : (m_encryptedExtendedHeader.empty() ? 0x4U : 0x5U));
     byte flags = 0x00;

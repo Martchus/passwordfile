@@ -32,6 +32,7 @@ public:
     void load();
     // FIXME: use flags in v4
     void save(bool useEncryption = true, bool useCompression = true);
+    void write(bool useEncryption = true, bool useCompression = true);
     void clearEntries();
     void clear();
     void exportToTextfile(const std::string &targetPath) const;
