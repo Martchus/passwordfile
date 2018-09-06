@@ -18,6 +18,7 @@
 #include <memory>
 #include <sstream>
 #include <streambuf>
+#include <limits>
 
 using namespace std;
 using namespace IoUtilities;
@@ -188,10 +189,10 @@ void PasswordFile::load()
         m_extendedHeader = m_freader.readString(extendedHeaderSize);
     }
     // get length
-    fstream::pos_type headerSize = m_file.tellg();
+    auto headerSize = static_cast<size_t>(m_file.tellg());
     m_file.seekg(0, ios_base::end);
-    fstream::pos_type size = m_file.tellg();
-    m_file.seekg(headerSize, ios_base::beg);
+    auto size = static_cast<size_t>(m_file.tellg());
+    m_file.seekg(static_cast<streamoff>(headerSize), ios_base::beg);
     size -= headerSize;
     // read file
     unsigned char iv[aes256cbcIvSize] = { 0 };
@@ -207,29 +208,33 @@ void PasswordFile::load()
     }
     // decrypt contents
     vector<char> rawbuff;
-    m_freader.read(rawbuff, size);
+    m_freader.read(rawbuff, static_cast<streamoff>(size));
     vector<char> decbuff;
     if (decrypterUsed) {
+        if (size > numeric_limits<int>::max()) {
+            throw CryptoException("Size exceeds limit.");
+        }
+
         // initiate ctx
         EVP_CIPHER_CTX *ctx = nullptr;
-        decbuff.resize(size + static_cast<fstream::pos_type>(32));
+        decbuff.resize(size + 32);
         int outlen1, outlen2;
         if ((ctx = EVP_CIPHER_CTX_new()) == nullptr
             || EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<unsigned const char *>(m_password), iv) != 1
             || EVP_DecryptUpdate(
-                   ctx, reinterpret_cast<unsigned char *>(decbuff.data()), &outlen1, reinterpret_cast<unsigned char *>(rawbuff.data()), size)
+                   ctx, reinterpret_cast<unsigned char *>(decbuff.data()), &outlen1, reinterpret_cast<unsigned char *>(rawbuff.data()), static_cast<int>(size))
                 != 1
             || EVP_DecryptFinal_ex(ctx, reinterpret_cast<unsigned char *>(decbuff.data()) + outlen1, &outlen2) != 1) {
             if (ctx) {
                 EVP_CIPHER_CTX_free(ctx);
             }
             string msg;
-            unsigned long errorCode = ERR_get_error();
-            while (errorCode != 0) {
+            auto errorCode = ERR_get_error();
+            while (errorCode) {
                 if (!msg.empty()) {
                     msg += "\n";
                 }
-                msg += ERR_error_string(errorCode, 0);
+                msg += ERR_error_string(errorCode, nullptr);
                 errorCode = ERR_get_error();
             }
             throw CryptoException(msg);
@@ -237,7 +242,11 @@ void PasswordFile::load()
             if (ctx) {
                 EVP_CIPHER_CTX_free(ctx);
             }
-            size = outlen1 + outlen2;
+            const auto decryptedSize = outlen1 + outlen2;
+            if (decryptedSize < 0) {
+                throw CryptoException("Decrypted size is negative.");
+            }
+            size = static_cast<size_t>(decryptedSize);
         }
     } else { // file is not crypted
         decbuff.swap(rawbuff);
@@ -250,7 +259,7 @@ void PasswordFile::load()
         uLongf decompressedSize = ConversionUtilities::LE::toUInt64(decbuff.data());
         rawbuff.resize(decompressedSize);
         switch (uncompress(reinterpret_cast<Bytef *>(rawbuff.data()), &decompressedSize, reinterpret_cast<Bytef *>(decbuff.data() + 8),
-            size - static_cast<fstream::pos_type>(8))) {
+            size - 8)) {
         case Z_MEM_ERROR:
             throw ParsingException("Decompressing failed. The source buffer was too small.");
         case Z_BUF_ERROR:
@@ -328,27 +337,32 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
         flags |= 0x20;
     }
     m_fwriter.writeByte(flags);
+
     // write extened header
     if (!m_extendedHeader.empty()) {
-        m_fwriter.writeUInt16BE(m_extendedHeader.size());
+        m_fwriter.writeUInt16BE(static_cast<uint16>(m_extendedHeader.size()));
         m_fwriter.writeString(m_extendedHeader);
     }
+
     // serialize root entry and descendants
     stringstream buffstr(stringstream::in | stringstream::out | stringstream::binary);
     buffstr.exceptions(ios_base::failbit | ios_base::badbit);
+
     // write encrypted extened header
     if (!m_encryptedExtendedHeader.empty()) {
-        m_fwriter.writeUInt16BE(m_encryptedExtendedHeader.size());
+        m_fwriter.writeUInt16BE(static_cast<uint16>(m_encryptedExtendedHeader.size()));
         m_fwriter.writeString(m_encryptedExtendedHeader);
     }
     m_rootEntry->make(buffstr);
     buffstr.seekp(0, ios_base::end);
-    stringstream::pos_type size = buffstr.tellp();
+    auto size = static_cast<size_t>(buffstr.tellp());
+
     // write the data to a buffer
     buffstr.seekg(0);
     vector<char> decbuff(size, 0);
-    buffstr.read(decbuff.data(), size);
+    buffstr.read(decbuff.data(), static_cast<streamoff>(size));
     vector<char> encbuff;
+
     // compress data
     if (useCompression) {
         uLongf compressedSize = compressBound(size);
@@ -364,45 +378,52 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
             size = 8 + compressedSize;
         }
     }
-    // encrypt data
-    if (useEncryption) {
-        // initiate ctx
-        EVP_CIPHER_CTX *ctx = nullptr;
-        unsigned char iv[aes256cbcIvSize];
-        int outlen1, outlen2;
-        encbuff.resize(size + static_cast<fstream::pos_type>(32));
-        if (RAND_bytes(iv, aes256cbcIvSize) != 1 || (ctx = EVP_CIPHER_CTX_new()) == nullptr
-            || EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<unsigned const char *>(m_password), iv) != 1
-            || EVP_EncryptUpdate(
-                   ctx, reinterpret_cast<unsigned char *>(encbuff.data()), &outlen1, reinterpret_cast<unsigned char *>(decbuff.data()), size)
-                != 1
-            || EVP_EncryptFinal_ex(ctx, reinterpret_cast<unsigned char *>(encbuff.data()) + outlen1, &outlen2) != 1) {
-            if (ctx) {
-                EVP_CIPHER_CTX_free(ctx);
-            }
-            string msg;
-            unsigned long errorCode = ERR_get_error();
-            while (errorCode != 0) {
-                if (!msg.empty()) {
-                    msg += "\n";
-                }
-                msg += ERR_error_string(errorCode, 0);
-                errorCode = ERR_get_error();
-            }
-            throw CryptoException(msg);
-        } else { // decryption succeeded
-            if (ctx) {
-                EVP_CIPHER_CTX_free(ctx);
-            }
-            // write encrypted data to file
-            m_file.write(reinterpret_cast<char *>(iv), aes256cbcIvSize);
-            m_file.write(encbuff.data(), static_cast<streamsize>(outlen1 + outlen2));
-        }
-    } else {
+
+    if (size > numeric_limits<int>::max()) {
+        throw CryptoException("size exceeds limit");
+    }
+
+    // write data without encryption
+    if (!useEncryption) {
         // write data to file
         m_file.write(decbuff.data(), static_cast<streamsize>(size));
+        return;
     }
-    m_file.flush();
+
+    // initiate ctx, encrypt data
+    EVP_CIPHER_CTX *ctx = nullptr;
+    unsigned char iv[aes256cbcIvSize];
+    int outlen1, outlen2;
+    encbuff.resize(size + 32);
+    if (RAND_bytes(iv, aes256cbcIvSize) != 1 || (ctx = EVP_CIPHER_CTX_new()) == nullptr
+        || EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<unsigned const char *>(m_password), iv) != 1
+        || EVP_EncryptUpdate(
+               ctx, reinterpret_cast<unsigned char *>(encbuff.data()), &outlen1, reinterpret_cast<unsigned char *>(decbuff.data()), static_cast<int>(size))
+            != 1
+        || EVP_EncryptFinal_ex(ctx, reinterpret_cast<unsigned char *>(encbuff.data()) + outlen1, &outlen2) != 1) {
+        // handle encryption error
+        if (ctx) {
+            EVP_CIPHER_CTX_free(ctx);
+        }
+        string msg;
+        auto errorCode = ERR_get_error();
+        while (errorCode) {
+            if (!msg.empty()) {
+                msg += "\n";
+            }
+            msg += ERR_error_string(errorCode, nullptr);
+            errorCode = ERR_get_error();
+        }
+        throw CryptoException(msg);
+    }
+
+    if (ctx) {
+        EVP_CIPHER_CTX_free(ctx);
+    }
+
+    // write encrypted data to file
+    m_file.write(reinterpret_cast<char *>(iv), aes256cbcIvSize);
+    m_file.write(encbuff.data(), static_cast<streamsize>(outlen1 + outlen2));
 }
 
 /*!
@@ -438,14 +459,14 @@ void PasswordFile::exportToTextfile(const string &targetPath) const
         throw runtime_error("Root entry has not been created.");
     }
     fstream output(targetPath.c_str(), ios_base::out);
-    function<void(int level)> indention = [&output](int level) {
+    const auto printIndention = [&output](int level) {
         for (int i = 0; i < level; ++i) {
             output << "    ";
         }
     };
     function<void(const Entry *entry, int level)> printNode;
-    printNode = [&output, &printNode, &indention](const Entry *entry, int level) {
-        indention(level);
+    printNode = [&output, &printNode, &printIndention](const Entry *entry, int level) {
+        printIndention(level);
         output << " - " << entry->label() << endl;
         switch (entry->type()) {
         case EntryType::Node:
@@ -455,9 +476,9 @@ void PasswordFile::exportToTextfile(const string &targetPath) const
             break;
         case EntryType::Account:
             for (const Field &field : static_cast<const AccountEntry *>(entry)->fields()) {
-                indention(level);
+                printIndention(level);
                 output << "    " << field.name();
-                for (int i = field.name().length(); i < 15; ++i) {
+                for (auto i = field.name().length(); i < 15; ++i) {
                     output << ' ';
                 }
                 output << field.value() << endl;
@@ -477,16 +498,17 @@ void PasswordFile::doBackup()
     if (!isOpen()) {
         open();
     }
-    m_file.seekg(0, ios_base::end);
-    if (m_file.tellg()) {
-        m_file.seekg(0);
-        fstream backupFile(m_path + ".backup", ios::out | ios::trunc | ios::binary);
-        backupFile.exceptions(ios_base::failbit | ios_base::badbit);
-        backupFile << m_file.rdbuf();
-        backupFile.close();
-    } else {
-        // the current file is empty anyways
+
+    // skip if the current file is empty anyways
+    if (!size()) {
+        return;
     }
+
+    m_file.seekg(0);
+    fstream backupFile(m_path + ".backup", ios::out | ios::trunc | ios::binary);
+    backupFile.exceptions(ios_base::failbit | ios_base::badbit);
+    backupFile << m_file.rdbuf();
+    backupFile.close();
 }
 
 /*!
@@ -591,12 +613,14 @@ bool PasswordFile::isEncryptionUsed()
         return false;
     }
     m_file.seekg(0);
+
     //check magic number
     if (m_freader.readUInt32LE() != 0x7770616DU) {
         return false;
     }
+
     //check version
-    uint32 version = m_freader.readUInt32LE();
+    const auto version = m_freader.readUInt32LE();
     if (version == 0x1U || version == 0x2U) {
         return true;
     } else if (version == 0x3U) {
@@ -615,7 +639,7 @@ bool PasswordFile::isOpen() const
 }
 
 /*!
- * \brief Returns the size of the file if the file is open; returns always zero otherwise.
+ * \brief Returns the size of the file if the file is open; otherwise returns zero.
  */
 size_t PasswordFile::size()
 {
@@ -623,6 +647,6 @@ size_t PasswordFile::size()
         return 0;
     }
     m_file.seekg(0, ios::end);
-    return m_file.tellg();
+    return static_cast<size_t>(m_file.tellg());
 }
 } // namespace Io
