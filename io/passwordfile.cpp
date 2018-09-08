@@ -281,9 +281,7 @@ void PasswordFile::load()
 
     // parse contents
     stringstream decryptedStream(stringstream::in | stringstream::out | stringstream::binary);
-    decryptedStream.write(decryptedData.data(), static_cast<streamsize>(remainingSize));
-    decryptedData.resize(0);
-    decryptedStream.seekg(0, ios_base::beg);
+    decryptedStream.rdbuf()->pubsetbuf(decryptedData.data(), static_cast<streamsize>(remainingSize));
     if (version >= 0x5u) {
         const auto extendedHeaderSize = m_freader.readUInt16BE();
         m_encryptedExtendedHeader = m_freader.readString(extendedHeaderSize);
