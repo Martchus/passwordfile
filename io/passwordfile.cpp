@@ -4,6 +4,7 @@
 #include "./parsingexception.h"
 
 #include <c++utilities/conversion/stringconversion.h>
+#include <c++utilities/conversion/stringbuilder.h>
 #include <c++utilities/io/catchiofailure.h>
 
 #include <openssl/conf.h>
@@ -21,6 +22,7 @@
 #include <streambuf>
 
 using namespace std;
+using namespace ConversionUtilities;
 using namespace IoUtilities;
 
 namespace Io {
@@ -252,6 +254,9 @@ void PasswordFile::load()
             throw CryptoException("Decrypted size is negative.");
         }
         remainingSize = static_cast<size_t>(decryptedSize);
+        if (!remainingSize) {
+            throw ParsingException("Decrypted buffer is empty.");
+        }
 
     } else {
         // use raw data directly if not encrypted
@@ -278,15 +283,28 @@ void PasswordFile::load()
             remainingSize = decompressedSize;
         }
     }
+    if (!remainingSize) {
+        throw ParsingException("Decompressed buffer is empty.");
+    }
 
     // parse contents
     stringstream decryptedStream(stringstream::in | stringstream::out | stringstream::binary);
-    decryptedStream.rdbuf()->pubsetbuf(decryptedData.data(), static_cast<streamsize>(remainingSize));
-    if (version >= 0x5u) {
-        const auto extendedHeaderSize = m_freader.readUInt16BE();
-        m_encryptedExtendedHeader = m_freader.readString(extendedHeaderSize);
+    decryptedStream.exceptions(ios_base::failbit | ios_base::badbit);
+    try {
+        decryptedStream.rdbuf()->pubsetbuf(decryptedData.data(), static_cast<streamsize>(remainingSize));
+        if (version >= 0x5u) {
+            const auto extendedHeaderSize = m_freader.readUInt16BE();
+            m_encryptedExtendedHeader = m_freader.readString(extendedHeaderSize);
+        }
+        m_rootEntry.reset(new NodeEntry(decryptedStream));
+    } catch (...) {
+        const char *const what = catchIoFailure();
+        if (decryptedStream.eof()) {
+            throw ParsingException("The file seems to be truncated.");
+        }
+        throw ParsingException(argsToString("An IO error occurred when reading internal buffer: ", what));
     }
-    m_rootEntry.reset(new NodeEntry(decryptedStream));
+
 }
 
 /*!
