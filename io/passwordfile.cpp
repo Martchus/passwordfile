@@ -291,7 +291,11 @@ void PasswordFile::load()
     stringstream decryptedStream(stringstream::in | stringstream::out | stringstream::binary);
     decryptedStream.exceptions(ios_base::failbit | ios_base::badbit);
     try {
+#ifdef _LIBCPP_VERSION
+        decryptedStream.write(decryptedData.data(), static_cast<streamsize>(remainingSize));
+#else
         decryptedStream.rdbuf()->pubsetbuf(decryptedData.data(), static_cast<streamsize>(remainingSize));
+#endif
         if (version >= 0x5u) {
             const auto extendedHeaderSize = m_freader.readUInt16BE();
             m_encryptedExtendedHeader = m_freader.readString(extendedHeaderSize);
