@@ -3,8 +3,8 @@
 #include "./entry.h"
 #include "./parsingexception.h"
 
-#include <c++utilities/conversion/stringconversion.h>
 #include <c++utilities/conversion/stringbuilder.h>
+#include <c++utilities/conversion/stringconversion.h>
 #include <c++utilities/io/catchiofailure.h>
 
 #include <openssl/conf.h>
@@ -308,7 +308,6 @@ void PasswordFile::load()
         }
         throw ParsingException(argsToString("An IO error occurred when reading internal buffer: ", what));
     }
-
 }
 
 /*!
