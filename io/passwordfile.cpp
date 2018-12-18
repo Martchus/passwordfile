@@ -3,6 +3,9 @@
 #include "./entry.h"
 #include "./parsingexception.h"
 
+#include "../util/openssl.h"
+#include "../util/opensslrandomdevice.h"
+
 #include <c++utilities/conversion/stringbuilder.h>
 #include <c++utilities/conversion/stringconversion.h>
 #include <c++utilities/io/catchiofailure.h>
@@ -63,6 +66,7 @@ PasswordFile::PasswordFile(const string &path, const string &password)
  */
 PasswordFile::PasswordFile(const PasswordFile &other)
     : m_path(other.m_path)
+    , m_password(other.m_password)
     , m_rootEntry(other.m_rootEntry ? make_unique<NodeEntry>(*other.m_rootEntry) : nullptr)
     , m_extendedHeader(other.m_extendedHeader)
     , m_encryptedExtendedHeader(other.m_encryptedExtendedHeader)
@@ -70,7 +74,6 @@ PasswordFile::PasswordFile(const PasswordFile &other)
     , m_fwriter(BinaryWriter(&m_file))
 {
     m_file.exceptions(ios_base::failbit | ios_base::badbit);
-    memcpy(m_password, other.m_password, 32);
 }
 
 /*!
@@ -78,6 +81,7 @@ PasswordFile::PasswordFile(const PasswordFile &other)
  */
 PasswordFile::PasswordFile(PasswordFile &&other)
     : m_path(move(other.m_path))
+    , m_password(move(other.m_password))
     , m_rootEntry(move(other.m_rootEntry))
     , m_extendedHeader(move(other.m_extendedHeader))
     , m_encryptedExtendedHeader(move(other.m_encryptedExtendedHeader))
@@ -85,7 +89,6 @@ PasswordFile::PasswordFile(PasswordFile &&other)
     , m_freader(BinaryReader(&m_file))
     , m_fwriter(BinaryWriter(&m_file))
 {
-    memcpy(m_password, other.m_password, 32);
 }
 
 /*!
@@ -99,13 +102,14 @@ PasswordFile::~PasswordFile()
  * \brief Opens the file. Does not load the contents (see load()).
  * \throws Throws ios_base::failure when an IO error occurs.
  */
-void PasswordFile::open(bool readOnly)
+void PasswordFile::open(PasswordFileOpenFlags options)
 {
     close();
     if (m_path.empty()) {
         throwIoFailure("Unable to open file because path is emtpy.");
     }
-    m_file.open(m_path, readOnly ? ios_base::in | ios_base::binary : ios_base::in | ios_base::out | ios_base::binary);
+    m_file.open(
+        m_path, options & PasswordFileOpenFlags::ReadOnly ? ios_base::in | ios_base::binary : ios_base::in | ios_base::out | ios_base::binary);
     opened();
 }
 
@@ -169,11 +173,11 @@ void PasswordFile::load()
 
     // check version and flags (used in version 0x3 only)
     const auto version = m_freader.readUInt32LE();
-    if (version != 0x0U && version != 0x1U && version != 0x2U && version != 0x3U && version != 0x4U && version != 0x5U) {
-        throw ParsingException("Version is unknown.");
+    if (version > 0x6U) {
+        throw ParsingException(argsToString("Version \"", version, "\" is unknown. Only versions 0 to 6 are supported."));
     }
     bool decrypterUsed, ivUsed, compressionUsed;
-    if (version == 0x3U) {
+    if (version >= 0x3U) {
         const auto flags = m_freader.readByte();
         decrypterUsed = flags & 0x80;
         ivUsed = flags & 0x40;
@@ -190,6 +194,8 @@ void PasswordFile::load()
     if (version >= 0x4U) {
         uint16 extendedHeaderSize = m_freader.readUInt16BE();
         m_extendedHeader = m_freader.readString(extendedHeaderSize);
+    } else {
+        m_extendedHeader.clear();
     }
 
     // get length
@@ -198,7 +204,17 @@ void PasswordFile::load()
     auto remainingSize = static_cast<size_t>(m_file.tellg()) - headerSize;
     m_file.seekg(static_cast<streamoff>(headerSize), ios_base::beg);
 
-    // read file
+    // read hash count
+    uint32_t hashCount = 0U;
+    if (version >= 0x6U && decrypterUsed) {
+        if (remainingSize < 4) {
+            throw ParsingException("Hash count truncated.");
+        }
+        hashCount = m_freader.readUInt32BE();
+        remainingSize -= 4;
+    }
+
+    // read IV
     unsigned char iv[aes256cbcIvSize] = { 0 };
     if (decrypterUsed && ivUsed) {
         if (remainingSize < aes256cbcIvSize) {
@@ -220,12 +236,23 @@ void PasswordFile::load()
             throw CryptoException("Size exceeds limit.");
         }
 
+        // prepare password
+        Util::OpenSsl::Sha256Sum password;
+        if (hashCount) {
+            // hash the password as often as it has been hashed when writing the file
+            password = Util::OpenSsl::computeSha256Sum(reinterpret_cast<unsigned const char *>(m_password.data()), m_password.size());
+            for (uint32_t i = 1; i < hashCount; ++i) {
+                password = Util::OpenSsl::computeSha256Sum(password.data, Util::OpenSsl::Sha256Sum::size);
+            }
+        } else {
+            m_password.copy(reinterpret_cast<char *>(password.data), Util::OpenSsl::Sha256Sum::size);
+        }
+
         // initiate ctx, decrypt data
         EVP_CIPHER_CTX *ctx = nullptr;
         decryptedData.resize(remainingSize + 32);
         int outlen1, outlen2;
-        if ((ctx = EVP_CIPHER_CTX_new()) == nullptr
-            || EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<unsigned const char *>(m_password), iv) != 1
+        if ((ctx = EVP_CIPHER_CTX_new()) == nullptr || EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, password.data, iv) != 1
             || EVP_DecryptUpdate(ctx, reinterpret_cast<unsigned char *>(decryptedData.data()), &outlen1,
                    reinterpret_cast<unsigned char *>(rawData.data()), static_cast<int>(remainingSize))
                 != 1
@@ -297,8 +324,11 @@ void PasswordFile::load()
         decryptedStream.rdbuf()->pubsetbuf(decryptedData.data(), static_cast<streamsize>(remainingSize));
 #endif
         if (version >= 0x5u) {
-            const auto extendedHeaderSize = m_freader.readUInt16BE();
-            m_encryptedExtendedHeader = m_freader.readString(extendedHeaderSize);
+            BinaryReader reader(&decryptedStream);
+            const auto extendedHeaderSize = reader.readUInt16BE();
+            m_encryptedExtendedHeader = reader.readString(extendedHeaderSize);
+        } else {
+            m_encryptedExtendedHeader.clear();
         }
         m_rootEntry.reset(new NodeEntry(decryptedStream));
     } catch (...) {
@@ -311,14 +341,28 @@ void PasswordFile::load()
 }
 
 /*!
+ * \brief Returns the minimum file version required to write the current instance with the specified \a options.
+ */
+uint32 PasswordFile::mininumVersion(PasswordFileSaveFlags options) const
+{
+    if (options & PasswordFileSaveFlags::PasswordHashing) {
+        return 0x6U; // password hashing requires at least version 6
+    } else if (!m_encryptedExtendedHeader.empty()) {
+        return 0x5U; // encrypted extended header requires at least version 5
+    } else if (!m_extendedHeader.empty()) {
+        return 0x4U; // regular extended header requires at least version 4
+    }
+    return 0x3U; // lowest supported version by the serializer
+}
+
+/*!
  * \brief Writes the current root entry to the file under path() replacing its previous contents.
- * \param useEncryption Specifies whether encryption should be used.
- * \param useCompression Specifies whether compression should be used.
+ * \param options Specify the features (like encryption and compression) to be used.
  * \throws Throws ios_base::failure when an IO error occurs.
  * \throws Throws runtime_error when no root entry is present or a compression error occurs.
  * \throws Throws Io::CryptoException when an encryption error occurs.
  */
-void PasswordFile::save(bool useEncryption, bool useCompression)
+void PasswordFile::save(PasswordFileSaveFlags options)
 {
     if (!m_rootEntry) {
         throw runtime_error("Root entry has not been created.");
@@ -333,19 +377,18 @@ void PasswordFile::save(bool useEncryption, bool useCompression)
         m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
     }
 
-    write(useEncryption, useCompression);
+    write(options);
     m_file.flush();
 }
 
 /*!
  * \brief Writes the current root entry to the file which is assumed to be opened and writeable.
- * \param useEncryption Specifies whether encryption should be used.
- * \param useCompression Specifies whether compression should be used.
+ * \param options Specify the features (like encryption and compression) to be used.
  * \throws Throws ios_base::failure when an IO error occurs.
  * \throws Throws runtime_error when no root entry is present or a compression error occurs.
  * \throws Throws Io::CryptoException when an encryption error occurs.
  */
-void PasswordFile::write(bool useEncryption, bool useCompression)
+void PasswordFile::write(PasswordFileSaveFlags options)
 {
     if (!m_rootEntry) {
         throw runtime_error("Root entry has not been created.");
@@ -354,19 +397,25 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
     // write magic number
     m_fwriter.writeUInt32LE(0x7770616DU);
 
-    // write version, extended header requires version 4, encrypted extended header required version 5
-    m_fwriter.writeUInt32LE(m_extendedHeader.empty() && m_encryptedExtendedHeader.empty() ? 0x3U : (m_encryptedExtendedHeader.empty() ? 0x4U : 0x5U));
+    // write version
+    const auto version = mininumVersion(options);
+    m_fwriter.writeUInt32LE(version);
+
+    // write flags
     byte flags = 0x00;
-    if (useEncryption) {
+    if (options & PasswordFileSaveFlags::Encryption) {
         flags |= 0x80 | 0x40;
     }
-    if (useCompression) {
+    if (options & PasswordFileSaveFlags::Compression) {
         flags |= 0x20;
     }
     m_fwriter.writeByte(flags);
 
     // write extened header
-    if (!m_extendedHeader.empty()) {
+    if (version >= 0x4U) {
+        if (m_extendedHeader.size() > numeric_limits<uint16>::max()) {
+            throw runtime_error("Extended header exceeds maximum size.");
+        }
         m_fwriter.writeUInt16BE(static_cast<uint16>(m_extendedHeader.size()));
         m_fwriter.writeString(m_extendedHeader);
     }
@@ -376,9 +425,13 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
     buffstr.exceptions(ios_base::failbit | ios_base::badbit);
 
     // write encrypted extened header
-    if (!m_encryptedExtendedHeader.empty()) {
-        m_fwriter.writeUInt16BE(static_cast<uint16>(m_encryptedExtendedHeader.size()));
-        m_fwriter.writeString(m_encryptedExtendedHeader);
+    if (version >= 0x5U) {
+        if (m_encryptedExtendedHeader.size() > numeric_limits<uint16>::max()) {
+            throw runtime_error("Encrypted extended header exceeds maximum size.");
+        }
+        BinaryWriter buffstrWriter(&buffstr);
+        buffstrWriter.writeUInt16BE(static_cast<uint16>(m_encryptedExtendedHeader.size()));
+        buffstrWriter.writeString(m_encryptedExtendedHeader);
     }
     m_rootEntry->make(buffstr);
     buffstr.seekp(0, ios_base::end);
@@ -391,7 +444,7 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
     vector<char> encryptedData;
 
     // compress data
-    if (useCompression) {
+    if (options & PasswordFileSaveFlags::Compression) {
         uLongf compressedSize = compressBound(size);
         encryptedData.resize(8 + compressedSize);
         ConversionUtilities::LE::getBytes(static_cast<uint64>(size), encryptedData.data());
@@ -412,10 +465,23 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
     }
 
     // write data without encryption
-    if (!useEncryption) {
+    if (!(options & PasswordFileSaveFlags::Encryption)) {
         // write data to file
         m_file.write(decryptedData.data(), static_cast<streamsize>(size));
         return;
+    }
+
+    // prepare password
+    Util::OpenSsl::Sha256Sum password;
+    const uint32_t hashCount = (options & PasswordFileSaveFlags::PasswordHashing) ? Util::OpenSsl::generateRandomNumber(1, 100) : 0u;
+    if (hashCount) {
+        // hash password a few times
+        password = Util::OpenSsl::computeSha256Sum(reinterpret_cast<unsigned const char *>(m_password.data()), m_password.size());
+        for (uint32_t i = 1; i < hashCount; ++i) {
+            password = Util::OpenSsl::computeSha256Sum(password.data, Util::OpenSsl::Sha256Sum::size);
+        }
+    } else {
+        m_password.copy(reinterpret_cast<char *>(password.data), Util::OpenSsl::Sha256Sum::size);
     }
 
     // initiate ctx, encrypt data
@@ -424,7 +490,7 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
     int outlen1, outlen2;
     encryptedData.resize(size + 32);
     if (RAND_bytes(iv, aes256cbcIvSize) != 1 || (ctx = EVP_CIPHER_CTX_new()) == nullptr
-        || EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, reinterpret_cast<unsigned const char *>(m_password), iv) != 1
+        || EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, password.data, iv) != 1
         || EVP_EncryptUpdate(ctx, reinterpret_cast<unsigned char *>(encryptedData.data()), &outlen1,
                reinterpret_cast<unsigned char *>(decryptedData.data()), static_cast<int>(size))
             != 1
@@ -450,6 +516,9 @@ void PasswordFile::write(bool useEncryption, bool useCompression)
     }
 
     // write encrypted data to file
+    if (version >= 0x6U) {
+        m_fwriter.writeUInt32BE(hashCount);
+    }
     m_file.write(reinterpret_cast<char *>(iv), aes256cbcIvSize);
     m_file.write(encryptedData.data(), static_cast<streamsize>(outlen1 + outlen2));
 }
@@ -610,18 +679,25 @@ void PasswordFile::clearPath()
 /*!
  * \brief Returns the current password. It will be used when loading or saving using encryption.
  */
-const char *PasswordFile::password() const
+const std::string &PasswordFile::password() const
 {
     return m_password;
 }
 
 /*!
- * \brief Sets the current password. It will be used when loading or saving using encryption.
+ * \brief Sets the current password. It will be used when loading an encrypted file or when saving using encryption.
  */
-void PasswordFile::setPassword(const string &value)
+void PasswordFile::setPassword(const string &password)
 {
-    clearPassword();
-    value.copy(m_password, 32, 0);
+    m_password = password;
+}
+
+/*!
+ * \brief Sets the current password. It will be used when loading an encrypted file or when saving using encryption.
+ */
+void PasswordFile::setPassword(const char *password, const size_t passwordSize)
+{
+    m_password.assign(password, passwordSize);
 }
 
 /*!
@@ -629,7 +705,7 @@ void PasswordFile::setPassword(const string &value)
  */
 void PasswordFile::clearPassword()
 {
-    memset(m_password, 0, 32);
+    m_password.clear();
 }
 
 /*!
@@ -642,16 +718,16 @@ bool PasswordFile::isEncryptionUsed()
     }
     m_file.seekg(0);
 
-    //check magic number
+    // check magic number
     if (m_freader.readUInt32LE() != 0x7770616DU) {
         return false;
     }
 
-    //check version
+    // check version
     const auto version = m_freader.readUInt32LE();
     if (version == 0x1U || version == 0x2U) {
         return true;
-    } else if (version == 0x3U) {
+    } else if (version >= 0x3U) {
         return m_freader.readByte() & 0x80;
     } else {
         return false;
@@ -664,6 +740,38 @@ bool PasswordFile::isEncryptionUsed()
 bool PasswordFile::isOpen() const
 {
     return m_file.is_open();
+}
+
+/*!
+ * \brief Returns the extended header.
+ */
+string &PasswordFile::extendedHeader()
+{
+    return m_extendedHeader;
+}
+
+/*!
+ * \brief Returns the extended header.
+ */
+const string &PasswordFile::extendedHeader() const
+{
+    return m_extendedHeader;
+}
+
+/*!
+ * \brief Returns the encrypted extended header.
+ */
+string &PasswordFile::encryptedExtendedHeader()
+{
+    return m_encryptedExtendedHeader;
+}
+
+/*!
+ * \brief Returns the encrypted extended header.
+ */
+const string &PasswordFile::encryptedExtendedHeader() const
+{
+    return m_encryptedExtendedHeader;
 }
 
 /*!

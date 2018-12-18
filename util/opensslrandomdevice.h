@@ -14,7 +14,7 @@ public:
     using result_type = uint32;
 
     OpenSslRandomDevice();
-    uint32 operator()() const;
+    result_type operator()() const;
     bool status() const;
     static constexpr result_type min();
     static constexpr result_type max();

@@ -28,7 +28,7 @@ OpenSslRandomDevice::OpenSslRandomDevice()
 /*!
  * \brief Generates a new random number.
  */
-uint32 OpenSslRandomDevice::operator()() const
+OpenSslRandomDevice::result_type OpenSslRandomDevice::operator()() const
 {
     unsigned char buf[4];
     if (RAND_bytes(buf, sizeof(buf))) {

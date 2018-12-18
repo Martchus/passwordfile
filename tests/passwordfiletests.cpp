@@ -19,9 +19,8 @@ using namespace CPPUNIT_NS;
 class PasswordFileTests : public TestFixture {
     CPPUNIT_TEST_SUITE(PasswordFileTests);
     CPPUNIT_TEST(testReading);
-#ifdef PLATFORM_UNIX
-    CPPUNIT_TEST(testWriting);
-#endif
+    CPPUNIT_TEST(testBasicWriting);
+    CPPUNIT_TEST(testExtendedWriting);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -29,11 +28,10 @@ public:
     void tearDown();
 
     void testReading();
-    void testReading(
-        const string &testfile1path, const string &testfile1password, const string &testfile2, const string &testfile2password, bool testfile2Mod);
-#ifdef PLATFORM_UNIX
-    void testWriting();
-#endif
+    void testReading(const string &context, const string &testfile1path, const string &testfile1password, const string &testfile2,
+        const string &testfile2password, bool testfile2Mod, bool extendedHeaderMod);
+    void testBasicWriting();
+    void testExtendedWriting();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PasswordFileTests);
@@ -51,19 +49,20 @@ void PasswordFileTests::tearDown()
  */
 void PasswordFileTests::testReading()
 {
-    testReading(TestUtilities::testFilePath("testfile1.pwmgr"), "123456", TestUtilities::testFilePath("testfile2.pwmgr"), string(), false);
+    testReading(
+        "read", TestUtilities::testFilePath("testfile1.pwmgr"), "123456", TestUtilities::testFilePath("testfile2.pwmgr"), string(), false, false);
 }
 
-void PasswordFileTests::testReading(
-    const string &testfile1path, const string &testfile1password, const string &testfile2, const string &testfile2password, bool testfile2Mod)
+void PasswordFileTests::testReading(const string &context, const string &testfile1path, const string &testfile1password, const string &testfile2,
+    const string &testfile2password, bool testfile2Mod, bool extendedHeaderMod)
 {
     PasswordFile file;
 
     // open testfile 1 ...
     file.setPath(testfile1path);
-    file.open(true);
+    file.open(PasswordFileOpenFlags::ReadOnly);
 
-    CPPUNIT_ASSERT_EQUAL(!testfile1password.empty(), file.isEncryptionUsed());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, !testfile1password.empty(), file.isEncryptionUsed());
     // attempt to decrypt using a wrong password
     file.setPassword(testfile1password + "asdf");
     if (!testfile1password.empty()) {
@@ -104,9 +103,16 @@ void PasswordFileTests::testReading(
     // test testaccount3
     CPPUNIT_ASSERT_EQUAL("testaccount3"s, rootEntry->children()[3]->label());
 
+    if (extendedHeaderMod) {
+        CPPUNIT_ASSERT_EQUAL("foo"s, file.extendedHeader());
+    } else {
+        CPPUNIT_ASSERT_EQUAL(""s, file.extendedHeader());
+    }
+    CPPUNIT_ASSERT_EQUAL(""s, file.encryptedExtendedHeader());
+
     // open testfile 2
     file.setPath(testfile2);
-    file.open(true);
+    file.open(PasswordFileOpenFlags::ReadOnly);
 
     CPPUNIT_ASSERT_EQUAL(!testfile2password.empty(), file.isEncryptionUsed());
     file.setPassword(testfile2password);
@@ -120,13 +126,19 @@ void PasswordFileTests::testReading(
         CPPUNIT_ASSERT_EQUAL("testfile2"s, rootEntry2->label());
         CPPUNIT_ASSERT_EQUAL(1_st, rootEntry2->children().size());
     }
+    if (extendedHeaderMod) {
+        CPPUNIT_ASSERT_EQUAL("foo"s, file.extendedHeader());
+        CPPUNIT_ASSERT_EQUAL("bar"s, file.encryptedExtendedHeader());
+    } else {
+        CPPUNIT_ASSERT_EQUAL(""s, file.extendedHeader());
+        CPPUNIT_ASSERT_EQUAL(""s, file.encryptedExtendedHeader());
+    }
 }
 
-#ifdef PLATFORM_UNIX
 /*!
- * \brief Tests writing and reading.
+ * \brief Tests writing (and reading again) using basic features.
  */
-void PasswordFileTests::testWriting()
+void PasswordFileTests::testBasicWriting()
 {
     const string testfile1 = TestUtilities::workingCopyPath("testfile1.pwmgr");
     const string testfile2 = TestUtilities::workingCopyPath("testfile2.pwmgr");
@@ -134,26 +146,66 @@ void PasswordFileTests::testWriting()
 
     // resave testfile 1
     file.setPath(testfile1);
-    file.open(false);
+    file.open();
     file.setPassword("123456");
     file.load();
     file.doBackup();
-    file.save(false, true);
+    file.save(PasswordFileSaveFlags::Compression);
 
     // resave testfile 2
     file.setPath(testfile2);
-    file.open(false);
+    file.open();
     file.load();
     file.rootEntry()->setLabel("testfile2 - modified");
     new AccountEntry("newAccount", file.rootEntry());
     file.setPassword("654321");
     file.doBackup();
-    file.save(true, false);
+    file.save(PasswordFileSaveFlags::Encryption);
 
     // check results using the reading test
-    testReading(testfile1, string(), testfile2, "654321", true);
+    testReading("basic writing", testfile1, string(), testfile2, "654321", true, false);
 
     // check backup files
-    testReading(testfile1 + ".backup", "123456", testfile2 + ".backup", string(), false);
+    testReading("basic writing", testfile1 + ".backup", "123456", testfile2 + ".backup", string(), false, false);
 }
-#endif
+
+/*!
+ * \brief Tests writing (and reading again) using extended features.
+ */
+void PasswordFileTests::testExtendedWriting()
+{
+    const string testfile1 = TestUtilities::workingCopyPath("testfile1.pwmgr");
+    const string testfile2 = TestUtilities::workingCopyPath("testfile2.pwmgr");
+    PasswordFile file;
+
+    // resave testfile 1
+    file.setPath(testfile1);
+    file.open();
+    file.setPassword("123456");
+    file.load();
+    CPPUNIT_ASSERT_EQUAL(""s, file.extendedHeader());
+    CPPUNIT_ASSERT_EQUAL(""s, file.encryptedExtendedHeader());
+    file.doBackup();
+    file.extendedHeader() = "foo";
+    file.save(PasswordFileSaveFlags::Encryption | PasswordFileSaveFlags::PasswordHashing);
+
+    // resave testfile 2
+    file.setPath(testfile2);
+    file.open();
+    file.load();
+    CPPUNIT_ASSERT_EQUAL(""s, file.extendedHeader());
+    CPPUNIT_ASSERT_EQUAL(""s, file.encryptedExtendedHeader());
+    file.rootEntry()->setLabel("testfile2 - modified");
+    new AccountEntry("newAccount", file.rootEntry());
+    file.setPassword("654321");
+    file.extendedHeader() = "foo";
+    file.encryptedExtendedHeader() = "bar";
+    file.doBackup();
+    file.save(PasswordFileSaveFlags::Encryption | PasswordFileSaveFlags::PasswordHashing);
+
+    // check results using the reading test
+    testReading("extended writing", testfile1, "123456", testfile2, "654321", true, true);
+
+    // check backup files
+    testReading("extended writing", testfile1 + ".backup", "123456", testfile2 + ".backup", string(), false, false);
+}

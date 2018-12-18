@@ -16,6 +16,56 @@ namespace Io {
 
 class NodeEntry;
 
+enum class PasswordFileOpenFlags : uint64 {
+    None = 0,
+    ReadOnly = 1,
+    Default = None,
+};
+
+constexpr PasswordFileOpenFlags operator|(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
+{
+    return static_cast<PasswordFileOpenFlags>(
+        static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
+}
+
+constexpr PasswordFileOpenFlags operator|=(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
+{
+    return static_cast<PasswordFileOpenFlags>(
+        static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
+}
+
+constexpr bool operator&(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
+{
+    return static_cast<bool>(
+        static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) & static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
+}
+
+enum class PasswordFileSaveFlags : uint64 {
+    None = 0,
+    Encryption = 1,
+    Compression = 2,
+    PasswordHashing = 4,
+    Default = Encryption | Compression | PasswordHashing,
+};
+
+constexpr PasswordFileSaveFlags operator|(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
+{
+    return static_cast<PasswordFileSaveFlags>(
+        static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
+}
+
+constexpr PasswordFileSaveFlags operator|=(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
+{
+    return static_cast<PasswordFileSaveFlags>(
+        static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
+}
+
+constexpr bool operator&(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
+{
+    return static_cast<bool>(
+        static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs) & static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
+}
+
 class PASSWORD_FILE_EXPORT PasswordFile {
 public:
     explicit PasswordFile();
@@ -24,15 +74,15 @@ public:
     PasswordFile(PasswordFile &&other);
     ~PasswordFile();
     IoUtilities::NativeFileStream &fileStream();
-    void open(bool readOnly = false);
+    void open(PasswordFileOpenFlags options = PasswordFileOpenFlags::Default);
     void opened();
     void generateRootEntry();
     void create();
     void close();
     void load();
-    // FIXME: use flags in v4
-    void save(bool useEncryption = true, bool useCompression = true);
-    void write(bool useEncryption = true, bool useCompression = true);
+    uint32 mininumVersion(PasswordFileSaveFlags options) const;
+    void save(PasswordFileSaveFlags options = PasswordFileSaveFlags::Default);
+    void write(PasswordFileSaveFlags options = PasswordFileSaveFlags::Default);
     void clearEntries();
     void clear();
     void exportToTextfile(const std::string &targetPath) const;
@@ -41,18 +91,23 @@ public:
     const NodeEntry *rootEntry() const;
     NodeEntry *rootEntry();
     const std::string &path() const;
-    const char *password() const;
+    const std::string &password() const;
     void setPath(const std::string &value);
     void clearPath();
-    void setPassword(const std::string &value);
+    void setPassword(const std::string &password);
+    void setPassword(const char *password, const std::size_t passwordSize);
     void clearPassword();
     bool isEncryptionUsed();
     bool isOpen() const;
+    std::string &extendedHeader();
+    const std::string &extendedHeader() const;
+    std::string &encryptedExtendedHeader();
+    const std::string &encryptedExtendedHeader() const;
     std::size_t size();
 
 private:
     std::string m_path;
-    char m_password[32];
+    std::string m_password;
     std::unique_ptr<NodeEntry> m_rootEntry;
     std::string m_extendedHeader;
     std::string m_encryptedExtendedHeader;

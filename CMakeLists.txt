@@ -29,6 +29,7 @@ set(TEST_SRC_FILES
     tests/entrytests.cpp
     tests/fieldtests.cpp
     tests/opensslrandomdevice.cpp
+    tests/opensslutils.cpp
 )
 
 set(DOC_FILES
@@ -42,9 +43,9 @@ set(META_APP_NAME "Passwordfile library")
 set(META_APP_AUTHOR "Martchus")
 set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
 set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files")
-set(META_VERSION_MAJOR 3)
-set(META_VERSION_MINOR 2)
-set(META_VERSION_PATCH 1)
+set(META_VERSION_MAJOR 4)
+set(META_VERSION_MINOR 0)
+set(META_VERSION_PATCH 0)
 set(META_PUBLIC_SHARED_LIB_DEPENDS c++utilities)
 set(META_PUBLIC_STATIC_LIB_DEPENDS c++utilities_static)
 
