@@ -28,10 +28,10 @@ constexpr PasswordFileOpenFlags operator|(PasswordFileOpenFlags lhs, PasswordFil
         static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
 }
 
-constexpr PasswordFileOpenFlags operator|=(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
+constexpr PasswordFileOpenFlags &operator|=(PasswordFileOpenFlags &lhs, PasswordFileOpenFlags rhs)
 {
-    return static_cast<PasswordFileOpenFlags>(
-        static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
+    return lhs = static_cast<PasswordFileOpenFlags>(static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs)
+               | static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
 }
 
 constexpr bool operator&(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
@@ -54,10 +54,10 @@ constexpr PasswordFileSaveFlags operator|(PasswordFileSaveFlags lhs, PasswordFil
         static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
 }
 
-constexpr PasswordFileSaveFlags operator|=(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
+constexpr PasswordFileSaveFlags &operator|=(PasswordFileSaveFlags &lhs, PasswordFileSaveFlags rhs)
 {
-    return static_cast<PasswordFileSaveFlags>(
-        static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
+    return lhs = static_cast<PasswordFileSaveFlags>(static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs)
+               | static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
 }
 
 constexpr bool operator&(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
