@@ -3,6 +3,7 @@
 
 #include "../global.h"
 
+#include <cstddef>
 #include <cstdint>
 
 namespace Util {
@@ -17,7 +18,7 @@ struct Sha256Sum {
 void PASSWORD_FILE_EXPORT init();
 void PASSWORD_FILE_EXPORT clean();
 Sha256Sum PASSWORD_FILE_EXPORT computeSha256Sum(const unsigned char *buffer, std::size_t size);
-uint32_t PASSWORD_FILE_EXPORT generateRandomNumber(uint32_t min, uint32_t max);
+std::uint32_t PASSWORD_FILE_EXPORT generateRandomNumber(std::uint32_t min, std::uint32_t max);
 
 } // namespace OpenSsl
 } // namespace Util
