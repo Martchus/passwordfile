@@ -24,8 +24,8 @@ class PasswordFileTests : public TestFixture {
     CPPUNIT_TEST_SUITE_END();
 
 public:
-    void setUp();
-    void tearDown();
+    void setUp() override;
+    void tearDown() override;
 
     void testReading();
     void testReading(const string &context, const string &testfile1path, const string &testfile1password, const string &testfile2,

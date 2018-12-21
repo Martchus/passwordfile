@@ -25,8 +25,8 @@ class OpenSslUtilsTests : public TestFixture {
     CPPUNIT_TEST_SUITE_END();
 
 public:
-    void setUp();
-    void tearDown();
+    void setUp() override;
+    void tearDown() override;
 
     void testComputeSha256Sum();
     void testGenerateRandomNumber();

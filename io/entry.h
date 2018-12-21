@@ -120,18 +120,18 @@ public:
     NodeEntry(const std::string &label, NodeEntry *parent = nullptr);
     NodeEntry(std::istream &stream);
     NodeEntry(const NodeEntry &other);
-    ~NodeEntry();
+    ~NodeEntry() override;
 
-    virtual EntryType type() const;
+    EntryType type() const override;
     const std::vector<Entry *> &children() const;
     void deleteChildren(int begin, int end);
     void replaceChild(std::size_t at, Entry *newChild);
     Entry *entryByPath(std::list<std::string> &path, bool includeThis = true, EntryType *creationType = nullptr);
     bool isExpandedByDefault() const;
     void setExpandedByDefault(bool expandedByDefault);
-    virtual void make(std::ostream &stream) const;
-    virtual NodeEntry *clone() const;
-    void accumulateStatistics(EntryStatistics &stats) const;
+    void make(std::ostream &stream) const override;
+    NodeEntry *clone() const override;
+    void accumulateStatistics(EntryStatistics &stats) const override;
 
 private:
     std::vector<Entry *> m_children;
@@ -174,14 +174,14 @@ public:
     AccountEntry(const std::string &label, NodeEntry *parent = nullptr);
     AccountEntry(std::istream &stream);
     AccountEntry(const AccountEntry &other);
-    ~AccountEntry();
+    ~AccountEntry() override;
 
-    virtual EntryType type() const;
+    EntryType type() const override;
     const std::vector<Field> &fields() const;
     std::vector<Field> &fields();
-    virtual void make(std::ostream &stream) const;
-    virtual AccountEntry *clone() const;
-    void accumulateStatistics(EntryStatistics &stats) const;
+    void make(std::ostream &stream) const override;
+    AccountEntry *clone() const override;
+    void accumulateStatistics(EntryStatistics &stats) const override;
 
 private:
     std::vector<Field> m_fields;
