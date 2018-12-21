@@ -136,6 +136,95 @@ inline IoUtilities::NativeFileStream &PasswordFile::fileStream()
 }
 
 /*!
+ * \brief Returns the current file path.
+ */
+inline const std::string &PasswordFile::path() const
+{
+    return m_path;
+}
+
+/*!
+ * \brief Clears the current path. Causes the file to be closed if currently opened.
+ */
+inline void PasswordFile::clearPath()
+{
+    close();
+    m_path.clear();
+}
+
+/*!
+ * \brief Returns the current password. It will be used when loading or saving using encryption.
+ */
+inline const std::string &PasswordFile::password() const
+{
+    return m_password;
+}
+
+/*!
+ * \brief Sets the current password. It will be used when loading an encrypted file or when saving using encryption.
+ */
+inline void PasswordFile::setPassword(const std::string &password)
+{
+    m_password = password;
+}
+
+/*!
+ * \brief Sets the current password. It will be used when loading an encrypted file or when saving using encryption.
+ */
+inline void PasswordFile::setPassword(const char *password, const size_t passwordSize)
+{
+    m_password.assign(password, passwordSize);
+}
+
+/*!
+ * \brief Clears the current password.
+ */
+inline void PasswordFile::clearPassword()
+{
+    m_password.clear();
+}
+
+/*!
+ * \brief Returns an indication whether the file is open.
+ */
+inline bool PasswordFile::isOpen() const
+{
+    return m_file.is_open();
+}
+
+/*!
+ * \brief Returns the extended header.
+ */
+inline std::string &PasswordFile::extendedHeader()
+{
+    return m_extendedHeader;
+}
+
+/*!
+ * \brief Returns the extended header.
+ */
+inline const std::string &PasswordFile::extendedHeader() const
+{
+    return m_extendedHeader;
+}
+
+/*!
+ * \brief Returns the encrypted extended header.
+ */
+inline std::string &PasswordFile::encryptedExtendedHeader()
+{
+    return m_encryptedExtendedHeader;
+}
+
+/*!
+ * \brief Returns the encrypted extended header.
+ */
+inline const std::string &PasswordFile::encryptedExtendedHeader() const
+{
+    return m_encryptedExtendedHeader;
+}
+
+/*!
  * \brief Returns the file version used the last time when saving the file (the version of the file as it is on the disk).
  * \remarks The version might change when re-saving with different options. See mininumVersion().
  */

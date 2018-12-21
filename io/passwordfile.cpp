@@ -672,14 +672,6 @@ void PasswordFile::close()
 }
 
 /*!
- * \brief Returns the current file path.
- */
-const string &PasswordFile::path() const
-{
-    return m_path;
-}
-
-/*!
  * \brief Sets the current file path. Closes the file if currently opened.
  */
 void PasswordFile::setPath(const string &value)
@@ -691,47 +683,6 @@ void PasswordFile::setPath(const string &value)
     if (ConversionUtilities::startsWith(m_path, "file:")) {
         m_path = m_path.substr(5);
     }
-}
-
-/*!
- * \brief Clears the current path. Causes the file to be closed if currently opened.
- */
-void PasswordFile::clearPath()
-{
-    close();
-    m_path.clear();
-}
-
-/*!
- * \brief Returns the current password. It will be used when loading or saving using encryption.
- */
-const std::string &PasswordFile::password() const
-{
-    return m_password;
-}
-
-/*!
- * \brief Sets the current password. It will be used when loading an encrypted file or when saving using encryption.
- */
-void PasswordFile::setPassword(const string &password)
-{
-    m_password = password;
-}
-
-/*!
- * \brief Sets the current password. It will be used when loading an encrypted file or when saving using encryption.
- */
-void PasswordFile::setPassword(const char *password, const size_t passwordSize)
-{
-    m_password.assign(password, passwordSize);
-}
-
-/*!
- * \brief Clears the current password.
- */
-void PasswordFile::clearPassword()
-{
-    m_password.clear();
 }
 
 /*!
@@ -758,46 +709,6 @@ bool PasswordFile::isEncryptionUsed()
     } else {
         return false;
     }
-}
-
-/*!
- * \brief Returns an indication whether the file is open.
- */
-bool PasswordFile::isOpen() const
-{
-    return m_file.is_open();
-}
-
-/*!
- * \brief Returns the extended header.
- */
-string &PasswordFile::extendedHeader()
-{
-    return m_extendedHeader;
-}
-
-/*!
- * \brief Returns the extended header.
- */
-const string &PasswordFile::extendedHeader() const
-{
-    return m_extendedHeader;
-}
-
-/*!
- * \brief Returns the encrypted extended header.
- */
-string &PasswordFile::encryptedExtendedHeader()
-{
-    return m_encryptedExtendedHeader;
-}
-
-/*!
- * \brief Returns the encrypted extended header.
- */
-const string &PasswordFile::encryptedExtendedHeader() const
-{
-    return m_encryptedExtendedHeader;
 }
 
 /*!
