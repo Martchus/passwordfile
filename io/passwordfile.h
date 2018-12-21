@@ -22,6 +22,8 @@ enum class PasswordFileOpenFlags : uint64 {
     Default = None,
 };
 
+std::string PASSWORD_FILE_EXPORT flagsToString(PasswordFileOpenFlags flags);
+
 constexpr PasswordFileOpenFlags operator|(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
 {
     return static_cast<PasswordFileOpenFlags>(
@@ -47,6 +49,8 @@ enum class PasswordFileSaveFlags : uint64 {
     PasswordHashing = 4,
     Default = Encryption | Compression | PasswordHashing,
 };
+
+std::string PASSWORD_FILE_EXPORT flagsToString(PasswordFileSaveFlags flags);
 
 constexpr PasswordFileSaveFlags operator|(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
 {
@@ -104,6 +108,10 @@ public:
     std::string &encryptedExtendedHeader();
     const std::string &encryptedExtendedHeader() const;
     std::size_t size();
+    uint32 version() const;
+    PasswordFileOpenFlags openOptions() const;
+    PasswordFileSaveFlags saveOptions() const;
+    std::string summary(PasswordFileSaveFlags saveOptions) const;
 
 private:
     std::string m_path;
@@ -114,6 +122,9 @@ private:
     IoUtilities::NativeFileStream m_file;
     IoUtilities::BinaryReader m_freader;
     IoUtilities::BinaryWriter m_fwriter;
+    uint32 m_version;
+    PasswordFileOpenFlags m_openOptions;
+    PasswordFileSaveFlags m_saveOptions;
 };
 
 /*!
@@ -122,6 +133,31 @@ private:
 inline IoUtilities::NativeFileStream &PasswordFile::fileStream()
 {
     return m_file;
+}
+
+/*!
+ * \brief Returns the file version used the last time when saving the file (the version of the file as it is on the disk).
+ * \remarks The version might change when re-saving with different options. See mininumVersion().
+ */
+inline uint32 PasswordFile::version() const
+{
+    return m_version;
+}
+
+/*!
+ * \brief Returns the options used to open the file.
+ */
+inline PasswordFileOpenFlags PasswordFile::openOptions() const
+{
+    return m_openOptions;
+}
+
+/*!
+ * \brief Returns the save options used the last time when saving the file.
+ */
+inline PasswordFileSaveFlags PasswordFile::saveOptions() const
+{
+    return m_saveOptions;
 }
 
 } // namespace Io

@@ -20,6 +20,12 @@ enum class EntryType : int {
     Account /**< denotes an AccountEntry */
 };
 
+struct EntryStatistics {
+    std::size_t nodeCount = 0;
+    std::size_t accountCount = 0;
+    std::size_t fieldCount = 0;
+};
+
 class NodeEntry;
 
 class PASSWORD_FILE_EXPORT Entry {
@@ -40,6 +46,8 @@ public:
     void path(std::list<std::string> &res) const;
     virtual void make(std::ostream &stream) const = 0;
     virtual Entry *clone() const = 0;
+    EntryStatistics computeStatistics() const;
+    virtual void accumulateStatistics(EntryStatistics &stats) const = 0;
     static Entry *parse(std::istream &stream);
     static bool denotesNodeEntry(byte version);
     static constexpr EntryType denotedEntryType(byte version);
@@ -93,6 +101,17 @@ inline int Entry::index() const
     return m_index;
 }
 
+/*!
+ * \brief Computes statistics for this entry.
+ * \remarks Takes the current instance and children into account but not parents.
+ */
+inline EntryStatistics Entry::computeStatistics() const
+{
+    EntryStatistics stats;
+    accumulateStatistics(stats);
+    return stats;
+}
+
 class PASSWORD_FILE_EXPORT NodeEntry : public Entry {
     friend class Entry;
 
@@ -112,6 +131,7 @@ public:
     void setExpandedByDefault(bool expandedByDefault);
     virtual void make(std::ostream &stream) const;
     virtual NodeEntry *clone() const;
+    void accumulateStatistics(EntryStatistics &stats) const;
 
 private:
     std::vector<Entry *> m_children;
@@ -161,6 +181,7 @@ public:
     std::vector<Field> &fields();
     virtual void make(std::ostream &stream) const;
     virtual AccountEntry *clone() const;
+    void accumulateStatistics(EntryStatistics &stats) const;
 
 private:
     std::vector<Field> m_fields;

@@ -421,6 +421,17 @@ NodeEntry *NodeEntry::clone() const
 }
 
 /*!
+ * \brief Accumulates the statistics for this node entry and its children.
+ */
+void NodeEntry::accumulateStatistics(EntryStatistics &stats) const
+{
+    ++stats.nodeCount;
+    for (const auto *children : children()) {
+        children->accumulateStatistics(stats);
+    }
+}
+
+/*!
  * \class AccountEntry
  * \brief The exception that is thrown when a parsing error occurs.
  */
@@ -500,5 +511,14 @@ void AccountEntry::make(ostream &stream) const
 AccountEntry *AccountEntry::clone() const
 {
     return new AccountEntry(*this);
+}
+
+/*!
+ * \brief Accumulates the statistics for this account entry and its fields.
+ */
+void AccountEntry::accumulateStatistics(EntryStatistics &stats) const
+{
+    stats.accountCount += 1;
+    stats.fieldCount += fields().size();
 }
 } // namespace Io

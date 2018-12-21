@@ -44,6 +44,9 @@ const unsigned int aes256cbcIvSize = 16U;
 PasswordFile::PasswordFile()
     : m_freader(BinaryReader(&m_file))
     , m_fwriter(BinaryWriter(&m_file))
+    , m_version(0)
+    , m_openOptions(PasswordFileOpenFlags::None)
+    , m_saveOptions(PasswordFileSaveFlags::None)
 {
     m_file.exceptions(ios_base::failbit | ios_base::badbit);
     clearPassword();
@@ -55,6 +58,9 @@ PasswordFile::PasswordFile()
 PasswordFile::PasswordFile(const string &path, const string &password)
     : m_freader(BinaryReader(&m_file))
     , m_fwriter(BinaryWriter(&m_file))
+    , m_version(0)
+    , m_openOptions(PasswordFileOpenFlags::None)
+    , m_saveOptions(PasswordFileSaveFlags::None)
 {
     m_file.exceptions(ios_base::failbit | ios_base::badbit);
     setPath(path);
@@ -72,6 +78,9 @@ PasswordFile::PasswordFile(const PasswordFile &other)
     , m_encryptedExtendedHeader(other.m_encryptedExtendedHeader)
     , m_freader(BinaryReader(&m_file))
     , m_fwriter(BinaryWriter(&m_file))
+    , m_version(other.m_version)
+    , m_openOptions(other.m_openOptions)
+    , m_saveOptions(other.m_saveOptions)
 {
     m_file.exceptions(ios_base::failbit | ios_base::badbit);
 }
@@ -88,6 +97,9 @@ PasswordFile::PasswordFile(PasswordFile &&other)
     , m_file(move(other.m_file))
     , m_freader(BinaryReader(&m_file))
     , m_fwriter(BinaryWriter(&m_file))
+    , m_version(other.m_version)
+    , m_openOptions(other.m_openOptions)
+    , m_saveOptions(other.m_saveOptions)
 {
 }
 
@@ -165,6 +177,8 @@ void PasswordFile::load()
         open();
     }
     m_file.seekg(0);
+    m_version = 0;
+    m_saveOptions = PasswordFileSaveFlags::None;
 
     // check magic number
     if (m_freader.readUInt32LE() != 0x7770616DU) {
@@ -172,26 +186,35 @@ void PasswordFile::load()
     }
 
     // check version and flags (used in version 0x3 only)
-    const auto version = m_freader.readUInt32LE();
-    if (version > 0x6U) {
-        throw ParsingException(argsToString("Version \"", version, "\" is unknown. Only versions 0 to 6 are supported."));
+    m_version = m_freader.readUInt32LE();
+    if (m_version > 0x6U) {
+        throw ParsingException(argsToString("Version \"", m_version, "\" is unknown. Only versions 0 to 6 are supported."));
+    }
+    if (m_version >= 0x6U) {
+        m_saveOptions |= PasswordFileSaveFlags::PasswordHashing;
     }
     bool decrypterUsed, ivUsed, compressionUsed;
-    if (version >= 0x3U) {
+    if (m_version >= 0x3U) {
         const auto flags = m_freader.readByte();
-        decrypterUsed = flags & 0x80;
+        if ((decrypterUsed = flags & 0x80)) {
+            m_saveOptions |= PasswordFileSaveFlags::Encryption;
+        }
+        if ((compressionUsed = flags & 0x20)) {
+            m_saveOptions |= PasswordFileSaveFlags::Compression;
+        }
         ivUsed = flags & 0x40;
-        compressionUsed = flags & 0x20;
     } else {
-        decrypterUsed = version >= 0x1U;
-        ivUsed = version == 0x2U;
+        if ((decrypterUsed = m_version >= 0x1U)) {
+            m_saveOptions |= PasswordFileSaveFlags::Encryption;
+        }
         compressionUsed = false;
+        ivUsed = m_version == 0x2U;
     }
 
     // skip extended header
     // (the extended header might be used in further versions to
     //  add additional information without breaking compatibility)
-    if (version >= 0x4U) {
+    if (m_version >= 0x4U) {
         uint16 extendedHeaderSize = m_freader.readUInt16BE();
         m_extendedHeader = m_freader.readString(extendedHeaderSize);
     } else {
@@ -206,7 +229,7 @@ void PasswordFile::load()
 
     // read hash count
     uint32_t hashCount = 0U;
-    if (version >= 0x6U && decrypterUsed) {
+    if ((m_saveOptions & PasswordFileSaveFlags::PasswordHashing) && decrypterUsed) {
         if (remainingSize < 4) {
             throw ParsingException("Hash count truncated.");
         }
@@ -323,7 +346,7 @@ void PasswordFile::load()
 #else
         decryptedStream.rdbuf()->pubsetbuf(decryptedData.data(), static_cast<streamsize>(remainingSize));
 #endif
-        if (version >= 0x5u) {
+        if (m_version >= 0x5u) {
             BinaryReader reader(&decryptedStream);
             const auto extendedHeaderSize = reader.readUInt16BE();
             m_encryptedExtendedHeader = reader.readString(extendedHeaderSize);
@@ -342,6 +365,7 @@ void PasswordFile::load()
 
 /*!
  * \brief Returns the minimum file version required to write the current instance with the specified \a options.
+ * \remarks This version will be used by save() and write() when passing the same \a options.
  */
 uint32 PasswordFile::mininumVersion(PasswordFileSaveFlags options) const
 {
@@ -785,4 +809,66 @@ size_t PasswordFile::size()
     m_file.seekg(0, ios::end);
     return static_cast<size_t>(m_file.tellg());
 }
+
+/*!
+ * \brief Returns a summary about the file (version, used features, statistics).
+ */
+string PasswordFile::summary(PasswordFileSaveFlags saveOptions) const
+{
+    string result = "<table>";
+    if (!m_path.empty()) {
+        result += argsToString("<tr><td>Path:</td><td>", m_path, "</td></tr>");
+    }
+    result += argsToString("<tr><td>Version:</td><td>", m_version, "</td></tr>");
+    const auto minVersion = mininumVersion(saveOptions);
+    if (m_version != minVersion) {
+        result += argsToString("<tr><td></td><td>(on disk, after saving: ", minVersion, ")</td></tr>");
+    }
+    result += argsToString("<tr><td>Features:</td><td>", flagsToString(m_saveOptions), "</td></tr>");
+    if (m_saveOptions != saveOptions) {
+        result += argsToString("<tr><td></td><td>(on disk, after saving: ", flagsToString(saveOptions), ")</td></tr>");
+    }
+    const auto stats = m_rootEntry ? m_rootEntry->computeStatistics() : EntryStatistics();
+    result += argsToString("<tr><td>Number of categories:</td><td>", stats.nodeCount, "</td></tr><tr><td>Number of accounts:</td><td>",
+        stats.accountCount, "</td></tr><tr><td>Number of fields:</td><td>", stats.fieldCount, "</td></tr></table>");
+    return result;
+}
+
+/*!
+ * \brief Returns a comma-separated string for the specified \a flags.
+ */
+string flagsToString(PasswordFileOpenFlags flags)
+{
+    vector<string> options;
+    if (flags & PasswordFileOpenFlags::ReadOnly) {
+        options.emplace_back("read-only");
+    }
+    if (options.empty()) {
+        options.emplace_back("none");
+    }
+    return joinStrings(options, ", ");
+}
+
+/*!
+ * \brief Returns a comma-separated string for the specified \a flags.
+ */
+string flagsToString(PasswordFileSaveFlags flags)
+{
+    vector<string> options;
+    options.reserve(3);
+    if (flags & PasswordFileSaveFlags::Encryption) {
+        options.emplace_back("encryption");
+    }
+    if (flags & PasswordFileSaveFlags::Compression) {
+        options.emplace_back("compression");
+    }
+    if (flags & PasswordFileSaveFlags::PasswordHashing) {
+        options.emplace_back("password hashing");
+    }
+    if (options.empty()) {
+        options.emplace_back("none");
+    }
+    return joinStrings(options, ", ");
+}
+
 } // namespace Io
