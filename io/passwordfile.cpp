@@ -122,6 +122,7 @@ void PasswordFile::open(PasswordFileOpenFlags options)
     }
     m_file.open(
         m_path, options & PasswordFileOpenFlags::ReadOnly ? ios_base::in | ios_base::binary : ios_base::in | ios_base::out | ios_base::binary);
+    m_openOptions = options;
     opened();
 }
 
@@ -564,6 +565,7 @@ void PasswordFile::clear()
     clearPath();
     clearPassword();
     clearEntries();
+    m_openOptions = PasswordFileOpenFlags::None;
     m_extendedHeader.clear();
     m_encryptedExtendedHeader.clear();
 }
