@@ -54,7 +54,7 @@ void PasswordFileTests::testReading()
 }
 
 void PasswordFileTests::testReading(const string &context, const string &testfile1path, const string &testfile1password, const string &testfile2,
-    const string &testfile2password, bool testfile2Mod, bool extendedHeaderMod)
+    const string &testfile2password, bool testfilesMod, bool extendedHeaderMod)
 {
     PasswordFile file;
 
@@ -73,65 +73,78 @@ void PasswordFileTests::testReading(const string &context, const string &testfil
     file.load();
     // test root entry
     const NodeEntry *const rootEntry = file.rootEntry();
-    CPPUNIT_ASSERT_EQUAL("testfile1"s, rootEntry->label());
-    CPPUNIT_ASSERT_EQUAL(4_st, rootEntry->children().size());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testfile1"s, rootEntry->label());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 4_st, rootEntry->children().size());
 
     // test testaccount1
-    CPPUNIT_ASSERT_EQUAL("testaccount1"s, rootEntry->children()[0]->label());
-    CPPUNIT_ASSERT_EQUAL(EntryType::Account, rootEntry->children()[0]->type());
-    CPPUNIT_ASSERT_EQUAL("pin"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).name());
-    CPPUNIT_ASSERT_EQUAL("123456"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).value());
-    CPPUNIT_ASSERT_EQUAL(FieldType::Password, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).type());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testaccount1"s, rootEntry->children()[0]->label());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, EntryType::Account, rootEntry->children()[0]->type());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "pin"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).name());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "123456"s, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).value());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, FieldType::Password, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).type());
     CPPUNIT_ASSERT(
         static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).tiedAccount() == static_cast<AccountEntry *>(rootEntry->children()[0]));
-    CPPUNIT_ASSERT_EQUAL(FieldType::Normal, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(1).type());
-    CPPUNIT_ASSERT_THROW(static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(2), out_of_range);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, FieldType::Normal, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(1).type());
+    CPPUNIT_ASSERT_THROW_MESSAGE(context, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(2), out_of_range);
 
     // test testaccount2
-    CPPUNIT_ASSERT_EQUAL("testaccount2"s, rootEntry->children()[1]->label());
-    CPPUNIT_ASSERT_EQUAL(EntryType::Account, rootEntry->children()[1]->type());
-    CPPUNIT_ASSERT_EQUAL(0_st, static_cast<AccountEntry *>(rootEntry->children()[1])->fields().size());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testaccount2"s, rootEntry->children()[1]->label());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, EntryType::Account, rootEntry->children()[1]->type());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 0_st, static_cast<AccountEntry *>(rootEntry->children()[1])->fields().size());
 
     // test testcategory1
-    CPPUNIT_ASSERT_EQUAL("testcategory1"s, rootEntry->children()[2]->label());
-    CPPUNIT_ASSERT_EQUAL(EntryType::Node, rootEntry->children()[2]->type());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testcategory1"s, rootEntry->children()[2]->label());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, EntryType::Node, rootEntry->children()[2]->type());
     const NodeEntry *const category = static_cast<NodeEntry *>(rootEntry->children()[2]);
-    CPPUNIT_ASSERT_EQUAL(3_st, category->children().size());
-    CPPUNIT_ASSERT_EQUAL(EntryType::Node, category->children()[2]->type());
-    CPPUNIT_ASSERT_EQUAL(2_st, static_cast<NodeEntry *>(category->children()[2])->children().size());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 3_st, category->children().size());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, EntryType::Node, category->children()[2]->type());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 2_st, static_cast<NodeEntry *>(category->children()[2])->children().size());
 
     // test testaccount3
-    CPPUNIT_ASSERT_EQUAL("testaccount3"s, rootEntry->children()[3]->label());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testaccount3"s, rootEntry->children()[3]->label());
 
-    if (extendedHeaderMod) {
-        CPPUNIT_ASSERT_EQUAL("foo"s, file.extendedHeader());
+    if (!testfilesMod) {
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "encryption, compression"s, flagsToString(file.saveOptions()));
+    } else if (extendedHeaderMod) {
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "foo"s, file.extendedHeader());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "encryption, password hashing"s, flagsToString(file.saveOptions()));
     } else {
-        CPPUNIT_ASSERT_EQUAL(""s, file.extendedHeader());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, ""s, file.extendedHeader());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "compression"s, flagsToString(file.saveOptions()));
     }
-    CPPUNIT_ASSERT_EQUAL(""s, file.encryptedExtendedHeader());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, ""s, file.encryptedExtendedHeader());
 
     // open testfile 2
     file.setPath(testfile2);
     file.open(PasswordFileOpenFlags::ReadOnly);
 
-    CPPUNIT_ASSERT_EQUAL(!testfile2password.empty(), file.isEncryptionUsed());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, !testfile2password.empty(), file.isEncryptionUsed());
     file.setPassword(testfile2password);
     file.load();
     const NodeEntry *const rootEntry2 = file.rootEntry();
-    if (testfile2Mod) {
-        CPPUNIT_ASSERT_EQUAL("testfile2 - modified"s, rootEntry2->label());
-        CPPUNIT_ASSERT_EQUAL(2_st, rootEntry2->children().size());
-        CPPUNIT_ASSERT_EQUAL("newAccount"s, rootEntry2->children()[1]->label());
+    if (testfilesMod) {
+        if (extendedHeaderMod) {
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<uint32>(6), file.version());
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "encryption, password hashing"s, flagsToString(file.saveOptions()));
+        } else {
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<uint32>(3), file.version());
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "encryption"s, flagsToString(file.saveOptions()));
+        }
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testfile2 - modified"s, rootEntry2->label());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 2_st, rootEntry2->children().size());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "newAccount"s, rootEntry2->children()[1]->label());
     } else {
-        CPPUNIT_ASSERT_EQUAL("testfile2"s, rootEntry2->label());
-        CPPUNIT_ASSERT_EQUAL(1_st, rootEntry2->children().size());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<uint32>(3), file.version());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testfile2"s, rootEntry2->label());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 1_st, rootEntry2->children().size());
     }
     if (extendedHeaderMod) {
-        CPPUNIT_ASSERT_EQUAL("foo"s, file.extendedHeader());
-        CPPUNIT_ASSERT_EQUAL("bar"s, file.encryptedExtendedHeader());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "foo"s, file.extendedHeader());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "bar"s, file.encryptedExtendedHeader());
+
     } else {
-        CPPUNIT_ASSERT_EQUAL(""s, file.extendedHeader());
-        CPPUNIT_ASSERT_EQUAL(""s, file.encryptedExtendedHeader());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, ""s, file.extendedHeader());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, ""s, file.encryptedExtendedHeader());
     }
 }
 
