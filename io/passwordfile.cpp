@@ -293,7 +293,7 @@ void PasswordFile::load()
                 msg += ERR_error_string(errorCode, nullptr);
                 errorCode = ERR_get_error();
             }
-            throw CryptoException(msg);
+            throw CryptoException(move(msg));
         }
 
         if (ctx) {
@@ -532,7 +532,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
             msg += ERR_error_string(errorCode, nullptr);
             errorCode = ERR_get_error();
         }
-        throw CryptoException(msg);
+        throw CryptoException(move(msg));
     }
 
     if (ctx) {
