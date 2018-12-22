@@ -319,10 +319,17 @@ void PasswordFile::load()
         if (remainingSize < 8) {
             throw ParsingException("File is truncated (decompressed size expected).");
         }
-        uLongf decompressedSize = ConversionUtilities::LE::toUInt64(decryptedData.data());
+        if (remainingSize > numeric_limits<uLongf>::max()) {
+            throw CryptoException("Size exceeds limit.");
+        }
+        const auto rawDecompressedSize = ConversionUtilities::LE::toUInt64(decryptedData.data());
+        if (rawDecompressedSize > numeric_limits<uLongf>::max()) {
+            throw ParsingException("Decompressed size exceeds limit.");
+        }
+        auto decompressedSize = static_cast<uLongf>(rawDecompressedSize);
         rawData.resize(decompressedSize);
-        switch (uncompress(
-            reinterpret_cast<Bytef *>(rawData.data()), &decompressedSize, reinterpret_cast<Bytef *>(decryptedData.data() + 8), remainingSize - 8)) {
+        switch (uncompress(reinterpret_cast<Bytef *>(rawData.data()), &decompressedSize, reinterpret_cast<Bytef *>(decryptedData.data() + 8),
+            static_cast<uLongf>(remainingSize - 8))) {
         case Z_MEM_ERROR:
             throw ParsingException("Decompressing failed. The source buffer was too small.");
         case Z_BUF_ERROR:
