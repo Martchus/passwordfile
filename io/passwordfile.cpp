@@ -686,7 +686,9 @@ void PasswordFile::setPath(const string &value)
 }
 
 /*!
- * \brief Returns an indication whether encryption is used if the file is open; returns always false otherwise.
+ * \brief Returns an indication whether encryption is used and the file is open; returns always false otherwise.
+ * \remarks This method is meant to determine whether encryption is used *before* loading the file. If the file has
+ *          already been loaded, use preferably saveOptions().
  */
 bool PasswordFile::isEncryptionUsed()
 {
