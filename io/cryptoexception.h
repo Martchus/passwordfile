@@ -12,23 +12,8 @@ class PASSWORD_FILE_EXPORT CryptoException : public std::runtime_error {
 public:
     explicit CryptoException(const std::string &message) noexcept;
     explicit CryptoException(const char *message) noexcept;
+    ~CryptoException() override;
 };
-
-/*!
- * \brief Constructs a crypto exception.
- */
-inline CryptoException::CryptoException(const std::string &message) noexcept
-    : runtime_error(message)
-{
-}
-
-/*!
- * \brief Constructs a crypto exception.
- */
-inline CryptoException::CryptoException(const char *message) noexcept
-    : runtime_error(message)
-{
-}
 
 } // namespace Io
 

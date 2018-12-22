@@ -12,23 +12,8 @@ class PASSWORD_FILE_EXPORT ParsingException : public std::runtime_error {
 public:
     explicit ParsingException(const std::string &message = std::string()) noexcept;
     explicit ParsingException(const char *message) noexcept;
+    ~ParsingException();
 };
-
-/*!
- * \brief Constructs a parsing exception.
- */
-inline ParsingException::ParsingException(const std::string &message) noexcept
-    : runtime_error(message)
-{
-}
-
-/*!
- * \brief Constructs a parsing exception.
- */
-inline ParsingException::ParsingException(const char *message) noexcept
-    : runtime_error(message)
-{
-}
 
 } // namespace Io
 
