@@ -136,9 +136,8 @@ void Entry::setParent(NodeEntry *parent, int index)
 
 /*!
  * \brief Returns an indication whether the instance is an indirect child of the specified \a entry.
- * \todo Make \a entry const in v4.
  */
-bool Entry::isIndirectChildOf(NodeEntry *entry) const
+bool Entry::isIndirectChildOf(const NodeEntry *entry) const
 {
     if (!parent()) {
         return false;
@@ -348,9 +347,8 @@ void NodeEntry::replaceChild(size_t at, Entry *newChild)
  *                     if the entry specified by the provided \a path does not exist. The parent of the entry
  *                     to be created must exist. Specify nullptr if no entries should be created (default).
  * \returns Returns the entry if found (or created); otherwise nullptr is returned.
- * \todo Use dedicated flags or at least make \a creationType const in v4.
  */
-Entry *NodeEntry::entryByPath(list<string> &path, bool includeThis, EntryType *creationType)
+Entry *NodeEntry::entryByPath(list<string> &path, bool includeThis, const EntryType *creationType)
 {
     if (path.empty()) {
         return nullptr;

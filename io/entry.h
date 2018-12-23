@@ -41,7 +41,7 @@ public:
     NodeEntry *parent() const;
     void setParent(NodeEntry *parent, int index = -1);
     int index() const;
-    bool isIndirectChildOf(NodeEntry *entry) const;
+    bool isIndirectChildOf(const NodeEntry *entry) const;
     std::list<std::string> path() const;
     void path(std::list<std::string> &res) const;
     virtual void make(std::ostream &stream) const = 0;
@@ -126,7 +126,7 @@ public:
     const std::vector<Entry *> &children() const;
     void deleteChildren(int begin, int end);
     void replaceChild(std::size_t at, Entry *newChild);
-    Entry *entryByPath(std::list<std::string> &path, bool includeThis = true, EntryType *creationType = nullptr);
+    Entry *entryByPath(std::list<std::string> &path, bool includeThis = true, const EntryType *creationType = nullptr);
     bool isExpandedByDefault() const;
     void setExpandedByDefault(bool expandedByDefault);
     void make(std::ostream &stream) const override;
