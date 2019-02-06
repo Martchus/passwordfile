@@ -12,7 +12,7 @@ class PASSWORD_FILE_EXPORT ParsingException : public std::runtime_error {
 public:
     explicit ParsingException(const std::string &message = std::string()) noexcept;
     explicit ParsingException(const char *message) noexcept;
-    ~ParsingException();
+    ~ParsingException() override;
 };
 
 } // namespace Io
