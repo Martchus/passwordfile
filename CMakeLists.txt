@@ -8,8 +8,7 @@ set(HEADER_FILES
     io/parsingexception.h
     io/passwordfile.h
     util/openssl.h
-    util/opensslrandomdevice.h
-)
+    util/opensslrandomdevice.h)
 set(SRC_FILES
     io/cryptoexception.cpp
     io/entry.cpp
@@ -17,23 +16,17 @@ set(SRC_FILES
     io/parsingexception.cpp
     io/passwordfile.cpp
     util/openssl.cpp
-    util/opensslrandomdevice.cpp
-)
-set(TEST_HEADER_FILES
-
-)
+    util/opensslrandomdevice.cpp)
+set(TEST_HEADER_FILES)
 set(TEST_SRC_FILES
     tests/utils.h
     tests/passwordfiletests.cpp
     tests/entrytests.cpp
     tests/fieldtests.cpp
     tests/opensslrandomdevice.cpp
-    tests/opensslutils.cpp
-)
+    tests/opensslutils.cpp)
 
-set(DOC_FILES
-    README.md
-)
+set(DOC_FILES README.md)
 
 # meta data
 set(META_PROJECT_NAME passwordfile)
@@ -56,23 +49,15 @@ use_cpp_utilities()
 # find 3rd party libraries
 include(3rdParty)
 # zlib
-use_external_library_from_package(
-    z
-    ZLIB ANY_VERSION
-    ZLIB_INCLUDE_DIRS
-    ZLIB_LIBRARIES
-    AUTO_LINKAGE
-    REQUIRED
-)
+use_external_library_from_package(z ZLIB ANY_VERSION ZLIB_INCLUDE_DIRS ZLIB_LIBRARIES AUTO_LINKAGE REQUIRED)
 # crypto library from OpenSSL
-use_external_library_from_package(
-    crypto
-    OpenSSL ANY_VERSION
-    OPENSSL_INCLUDE_DIR
-    OPENSSL_CRYPTO_LIBRARY
-    AUTO_LINKAGE
-    REQUIRED
-)
+use_external_library_from_package(crypto
+                                  OpenSSL
+                                  ANY_VERSION
+                                  OPENSSL_INCLUDE_DIR
+                                  OPENSSL_CRYPTO_LIBRARY
+                                  AUTO_LINKAGE
+                                  REQUIRED)
 
 # include modules to apply configuration
 include(BasicConfig)
