@@ -7,6 +7,7 @@
 #include <c++utilities/io/binarywriter.h>
 #include <c++utilities/io/nativefilestream.h>
 
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -16,7 +17,7 @@ namespace Io {
 
 class NodeEntry;
 
-enum class PasswordFileOpenFlags : uint64 {
+enum class PasswordFileOpenFlags : std::uint64_t {
     None = 0,
     ReadOnly = 1,
     Default = None,
@@ -42,7 +43,7 @@ constexpr bool operator&(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
         static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) & static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
 }
 
-enum class PasswordFileSaveFlags : uint64 {
+enum class PasswordFileSaveFlags : std::uint64_t {
     None = 0,
     Encryption = 1,
     Compression = 2,
@@ -84,7 +85,7 @@ public:
     void create();
     void close();
     void load();
-    uint32 mininumVersion(PasswordFileSaveFlags options) const;
+    std::uint32_t mininumVersion(PasswordFileSaveFlags options) const;
     void save(PasswordFileSaveFlags options = PasswordFileSaveFlags::Default);
     void write(PasswordFileSaveFlags options = PasswordFileSaveFlags::Default);
     void clearEntries();
@@ -108,7 +109,7 @@ public:
     std::string &encryptedExtendedHeader();
     const std::string &encryptedExtendedHeader() const;
     std::size_t size();
-    uint32 version() const;
+    std::uint32_t version() const;
     PasswordFileOpenFlags openOptions() const;
     PasswordFileSaveFlags saveOptions() const;
     std::string summary(PasswordFileSaveFlags saveOptions) const;
@@ -122,7 +123,7 @@ private:
     IoUtilities::NativeFileStream m_file;
     IoUtilities::BinaryReader m_freader;
     IoUtilities::BinaryWriter m_fwriter;
-    uint32 m_version;
+    std::uint32_t m_version;
     PasswordFileOpenFlags m_openOptions;
     PasswordFileSaveFlags m_saveOptions;
 };
@@ -228,7 +229,7 @@ inline const std::string &PasswordFile::encryptedExtendedHeader() const
  * \brief Returns the file version used the last time when saving the file (the version of the file as it is on the disk).
  * \remarks The version might change when re-saving with different options. See mininumVersion().
  */
-inline uint32 PasswordFile::version() const
+inline std::uint32_t PasswordFile::version() const
 {
     return m_version;
 }

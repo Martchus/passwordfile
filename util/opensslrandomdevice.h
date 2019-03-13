@@ -3,15 +3,14 @@
 
 #include "../global.h"
 
-#include <c++utilities/conversion/types.h>
-
+#include <cstdint>
 #include <limits>
 
 namespace Util {
 
 class PASSWORD_FILE_EXPORT OpenSslRandomDevice {
 public:
-    using result_type = uint32;
+    using result_type = std::uint32_t;
 
     OpenSslRandomDevice();
     result_type operator()() const;

@@ -8,7 +8,6 @@
 
 #include <c++utilities/conversion/stringbuilder.h>
 #include <c++utilities/conversion/stringconversion.h>
-#include <c++utilities/io/catchiofailure.h>
 
 #include <openssl/conf.h>
 #include <openssl/err.h>
@@ -118,7 +117,7 @@ void PasswordFile::open(PasswordFileOpenFlags options)
 {
     close();
     if (m_path.empty()) {
-        throwIoFailure("Unable to open file because path is emtpy.");
+        throw std::ios_base::failure("Unable to open file because path is emtpy.");
     }
     m_file.open(
         m_path, options & PasswordFileOpenFlags::ReadOnly ? ios_base::in | ios_base::binary : ios_base::in | ios_base::out | ios_base::binary);
@@ -135,7 +134,7 @@ void PasswordFile::opened()
 {
     m_file.seekg(0, ios_base::end);
     if (m_file.tellg() == 0) {
-        throwIoFailure("File is empty.");
+        throw std::ios_base::failure("File is empty.");
     } else {
         m_file.seekg(0);
     }
@@ -159,7 +158,7 @@ void PasswordFile::create()
 {
     close();
     if (m_path.empty()) {
-        throwIoFailure("Unable to create file because path is empty.");
+        throw std::ios_base::failure("Unable to create file because path is empty.");
     }
     m_file.open(m_path, fstream::out | fstream::trunc | fstream::binary);
 }
@@ -216,7 +215,7 @@ void PasswordFile::load()
     // (the extended header might be used in further versions to
     //  add additional information without breaking compatibility)
     if (m_version >= 0x4U) {
-        uint16 extendedHeaderSize = m_freader.readUInt16BE();
+        std::uint16_t extendedHeaderSize = m_freader.readUInt16BE();
         m_extendedHeader = m_freader.readString(extendedHeaderSize);
     } else {
         m_extendedHeader.clear();
@@ -362,12 +361,11 @@ void PasswordFile::load()
             m_encryptedExtendedHeader.clear();
         }
         m_rootEntry.reset(new NodeEntry(decryptedStream));
-    } catch (...) {
-        const char *const what = catchIoFailure();
+    } catch (const std::ios_base::failure &failure) {
         if (decryptedStream.eof()) {
             throw ParsingException("The file seems to be truncated.");
         }
-        throw ParsingException(argsToString("An IO error occurred when reading internal buffer: ", what));
+        throw ParsingException(argsToString("An IO error occurred when reading internal buffer: ", failure.what()));
     }
 }
 
@@ -375,7 +373,7 @@ void PasswordFile::load()
  * \brief Returns the minimum file version required to write the current instance with the specified \a options.
  * \remarks This version will be used by save() and write() when passing the same \a options.
  */
-uint32 PasswordFile::mininumVersion(PasswordFileSaveFlags options) const
+std::uint32_t PasswordFile::mininumVersion(PasswordFileSaveFlags options) const
 {
     if (options & PasswordFileSaveFlags::PasswordHashing) {
         return 0x6U; // password hashing requires at least version 6
@@ -434,7 +432,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     m_fwriter.writeUInt32LE(version);
 
     // write flags
-    byte flags = 0x00;
+    std::uint8_t flags = 0x00;
     if (options & PasswordFileSaveFlags::Encryption) {
         flags |= 0x80 | 0x40;
     }
@@ -445,10 +443,10 @@ void PasswordFile::write(PasswordFileSaveFlags options)
 
     // write extened header
     if (version >= 0x4U) {
-        if (m_extendedHeader.size() > numeric_limits<uint16>::max()) {
+        if (m_extendedHeader.size() > numeric_limits<std::uint16_t>::max()) {
             throw runtime_error("Extended header exceeds maximum size.");
         }
-        m_fwriter.writeUInt16BE(static_cast<uint16>(m_extendedHeader.size()));
+        m_fwriter.writeUInt16BE(static_cast<std::uint16_t>(m_extendedHeader.size()));
         m_fwriter.writeString(m_extendedHeader);
     }
 
@@ -458,11 +456,11 @@ void PasswordFile::write(PasswordFileSaveFlags options)
 
     // write encrypted extened header
     if (version >= 0x5U) {
-        if (m_encryptedExtendedHeader.size() > numeric_limits<uint16>::max()) {
+        if (m_encryptedExtendedHeader.size() > numeric_limits<std::uint16_t>::max()) {
             throw runtime_error("Encrypted extended header exceeds maximum size.");
         }
         BinaryWriter buffstrWriter(&buffstr);
-        buffstrWriter.writeUInt16BE(static_cast<uint16>(m_encryptedExtendedHeader.size()));
+        buffstrWriter.writeUInt16BE(static_cast<std::uint16_t>(m_encryptedExtendedHeader.size()));
         buffstrWriter.writeString(m_encryptedExtendedHeader);
     }
     m_rootEntry->make(buffstr);
@@ -479,7 +477,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     if (options & PasswordFileSaveFlags::Compression) {
         uLongf compressedSize = compressBound(size);
         encryptedData.resize(8 + compressedSize);
-        ConversionUtilities::LE::getBytes(static_cast<uint64>(size), encryptedData.data());
+        ConversionUtilities::LE::getBytes(static_cast<std::uint64_t>(size), encryptedData.data());
         switch (
             compress(reinterpret_cast<Bytef *>(encryptedData.data() + 8), &compressedSize, reinterpret_cast<Bytef *>(decryptedData.data()), size)) {
         case Z_MEM_ERROR:

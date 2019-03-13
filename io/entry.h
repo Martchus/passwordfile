@@ -3,8 +3,7 @@
 
 #include "./field.h"
 
-#include <c++utilities/conversion/types.h>
-
+#include <cstdint>
 #include <iostream>
 #include <list>
 #include <string>
@@ -49,8 +48,8 @@ public:
     EntryStatistics computeStatistics() const;
     virtual void accumulateStatistics(EntryStatistics &stats) const = 0;
     static Entry *parse(std::istream &stream);
-    static bool denotesNodeEntry(byte version);
-    static constexpr EntryType denotedEntryType(byte version);
+    static bool denotesNodeEntry(std::uint8_t version);
+    static constexpr EntryType denotedEntryType(std::uint8_t version);
 
 protected:
     Entry(const std::string &label = std::string(), NodeEntry *parent = nullptr);
@@ -158,12 +157,12 @@ inline void NodeEntry::setExpandedByDefault(bool expandedByDefault)
     m_expandedByDefault = expandedByDefault;
 }
 
-inline bool Entry::denotesNodeEntry(byte version)
+inline bool Entry::denotesNodeEntry(std::uint8_t version)
 {
     return (version & 0x80) == 0;
 }
 
-constexpr EntryType Entry::denotedEntryType(byte version)
+constexpr EntryType Entry::denotedEntryType(std::uint8_t version)
 {
     return (version & 0x80) == 0 ? EntryType::Node : EntryType::Account;
 }

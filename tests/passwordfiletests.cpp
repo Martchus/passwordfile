@@ -124,17 +124,17 @@ void PasswordFileTests::testReading(const string &context, const string &testfil
     const NodeEntry *const rootEntry2 = file.rootEntry();
     if (testfilesMod) {
         if (extendedHeaderMod) {
-            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<uint32>(6), file.version());
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<std::uint32_t>(6), file.version());
             CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "encryption, password hashing"s, flagsToString(file.saveOptions()));
         } else {
-            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<uint32>(3), file.version());
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<std::uint32_t>(3), file.version());
             CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "encryption"s, flagsToString(file.saveOptions()));
         }
         CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testfile2 - modified"s, rootEntry2->label());
         CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 2_st, rootEntry2->children().size());
         CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "newAccount"s, rootEntry2->children()[1]->label());
     } else {
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<uint32>(3), file.version());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(context, static_cast<std::uint32_t>(3), file.version());
         CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testfile2"s, rootEntry2->label());
         CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 1_st, rootEntry2->children().size());
     }

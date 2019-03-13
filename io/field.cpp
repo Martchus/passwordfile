@@ -42,14 +42,14 @@ Field::Field(AccountEntry *tiedAccount, istream &stream)
     }
     m_name = reader.readLengthPrefixedString();
     m_value = reader.readLengthPrefixedString();
-    byte type = reader.readByte();
+    std::uint8_t type = reader.readByte();
     if (!isValidType(type)) {
         throw ParsingException("Field type is not supported.");
     }
     m_type = static_cast<FieldType>(type);
     // read extended header for version 0x1
     if (version == 0x1) {
-        const uint16 extendedHeaderSize = reader.readUInt16BE();
+        const std::uint16_t extendedHeaderSize = reader.readUInt16BE();
         // currently there's nothing to read here
         m_extendedData = reader.readString(extendedHeaderSize);
     }
@@ -65,7 +65,7 @@ void Field::make(ostream &stream) const
     writer.writeByte(m_extendedData.empty() ? 0x0 : 0x1); // version
     writer.writeLengthPrefixedString(m_name);
     writer.writeLengthPrefixedString(m_value);
-    writer.writeByte(static_cast<byte>(m_type));
+    writer.writeByte(static_cast<std::uint8_t>(m_type));
     if (!m_extendedData.empty()) {
         writer.writeUInt16BE(m_extendedData.size());
         writer.writeString(m_extendedData);

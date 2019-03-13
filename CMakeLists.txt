@@ -35,29 +35,21 @@ set(META_APP_NAME "Passwordfile library")
 set(META_APP_AUTHOR "Martchus")
 set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
 set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files")
-set(META_VERSION_MAJOR 4)
+set(META_VERSION_MAJOR 5)
 set(META_VERSION_MINOR 0)
-set(META_VERSION_PATCH 1)
-set(META_PUBLIC_SHARED_LIB_DEPENDS c++utilities)
-set(META_PUBLIC_STATIC_LIB_DEPENDS c++utilities_static)
+set(META_VERSION_PATCH 0)
 set(META_ADD_DEFAULT_CPP_UNIT_TEST_APPLICATION ON)
 
 # find c++utilities
-find_package(c++utilities 4.17.0 REQUIRED)
-use_cpp_utilities()
+set(CONFIGURATION_PACKAGE_SUFFIX ""
+    CACHE STRING "sets the suffix for find_package() calls to packages configured via c++utilities")
+find_package(c++utilities${CONFIGURATION_PACKAGE_SUFFIX} 5.0.0 REQUIRED)
+use_cpp_utilities(VISIBILITY PUBLIC)
 
 # find 3rd party libraries
 include(3rdParty)
-# zlib
-use_external_library_from_package(z ZLIB ANY_VERSION ZLIB_INCLUDE_DIRS ZLIB_LIBRARIES AUTO_LINKAGE REQUIRED)
-# crypto library from OpenSSL
-use_external_library_from_package(crypto
-                                  OpenSSL
-                                  ANY_VERSION
-                                  OPENSSL_INCLUDE_DIR
-                                  OPENSSL_CRYPTO_LIBRARY
-                                  AUTO_LINKAGE
-                                  REQUIRED)
+use_zlib()
+use_crypto()
 
 # include modules to apply configuration
 include(BasicConfig)
