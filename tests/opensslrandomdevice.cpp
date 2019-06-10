@@ -9,7 +9,7 @@
 
 using namespace std;
 using namespace Util;
-using namespace TestUtilities::Literals;
+using namespace CppUtilities::Literals;
 
 using namespace CPPUNIT_NS;
 

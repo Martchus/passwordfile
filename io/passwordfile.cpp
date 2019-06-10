@@ -24,8 +24,7 @@
 #include <streambuf>
 
 using namespace std;
-using namespace ConversionUtilities;
-using namespace IoUtilities;
+using namespace CppUtilities;
 
 namespace Io {
 
@@ -321,7 +320,7 @@ void PasswordFile::load()
         if (remainingSize > numeric_limits<uLongf>::max()) {
             throw CryptoException("Size exceeds limit.");
         }
-        const auto rawDecompressedSize = ConversionUtilities::LE::toUInt64(decryptedData.data());
+        const auto rawDecompressedSize = LE::toUInt64(decryptedData.data());
         if (rawDecompressedSize > numeric_limits<uLongf>::max()) {
             throw ParsingException("Decompressed size exceeds limit.");
         }
@@ -477,7 +476,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     if (options & PasswordFileSaveFlags::Compression) {
         uLongf compressedSize = compressBound(size);
         encryptedData.resize(8 + compressedSize);
-        ConversionUtilities::LE::getBytes(static_cast<std::uint64_t>(size), encryptedData.data());
+        LE::getBytes(static_cast<std::uint64_t>(size), encryptedData.data());
         switch (
             compress(reinterpret_cast<Bytef *>(encryptedData.data() + 8), &compressedSize, reinterpret_cast<Bytef *>(decryptedData.data()), size)) {
         case Z_MEM_ERROR:
@@ -685,7 +684,7 @@ void PasswordFile::setPath(const string &value)
     m_path = value;
 
     // support "file://" protocol
-    if (ConversionUtilities::startsWith(m_path, "file:")) {
+    if (startsWith(m_path, "file:")) {
         m_path = m_path.substr(5);
     }
 }

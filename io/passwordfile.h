@@ -78,7 +78,7 @@ public:
     PasswordFile(const PasswordFile &other);
     PasswordFile(PasswordFile &&other);
     ~PasswordFile();
-    IoUtilities::NativeFileStream &fileStream();
+    CppUtilities::NativeFileStream &fileStream();
     void open(PasswordFileOpenFlags options = PasswordFileOpenFlags::Default);
     void opened();
     void generateRootEntry();
@@ -120,9 +120,9 @@ private:
     std::unique_ptr<NodeEntry> m_rootEntry;
     std::string m_extendedHeader;
     std::string m_encryptedExtendedHeader;
-    IoUtilities::NativeFileStream m_file;
-    IoUtilities::BinaryReader m_freader;
-    IoUtilities::BinaryWriter m_fwriter;
+    CppUtilities::NativeFileStream m_file;
+    CppUtilities::BinaryReader m_freader;
+    CppUtilities::BinaryWriter m_fwriter;
     std::uint32_t m_version;
     PasswordFileOpenFlags m_openOptions;
     PasswordFileSaveFlags m_saveOptions;
@@ -131,7 +131,7 @@ private:
 /*!
  * \brief Returns the underlying file stream.
  */
-inline IoUtilities::NativeFileStream &PasswordFile::fileStream()
+inline CppUtilities::NativeFileStream &PasswordFile::fileStream()
 {
     return m_file;
 }

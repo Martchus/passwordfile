@@ -5,8 +5,7 @@
 #include <c++utilities/io/binarywriter.h>
 
 using namespace std;
-using namespace IoUtilities;
-using namespace ConversionUtilities;
+using namespace CppUtilities;
 
 namespace Io {
 

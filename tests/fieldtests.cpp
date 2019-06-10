@@ -4,14 +4,14 @@
 #include "./utils.h"
 
 #include <c++utilities/tests/testutils.h>
-using namespace TestUtilities;
+using namespace CppUtilities;
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
 using namespace std;
 using namespace Io;
-using namespace TestUtilities::Literals;
+using namespace CppUtilities::Literals;
 
 using namespace CPPUNIT_NS;
 

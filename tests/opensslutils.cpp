@@ -10,8 +10,8 @@
 
 using namespace std;
 using namespace Util::OpenSsl;
-using namespace ConversionUtilities;
-using namespace TestUtilities::Literals;
+using namespace CppUtilities;
+using namespace CppUtilities::Literals;
 
 using namespace CPPUNIT_NS;
 

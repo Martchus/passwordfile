@@ -9,11 +9,11 @@
 
 #include <ostream>
 
-namespace TestUtilities {
+namespace CppUtilities {
 
 inline std::ostream &operator<<(std::ostream &out, const Io::Entry *entry)
 {
-    return out << ConversionUtilities::joinStrings(entry->path(), "/");
+    return out << joinStrings(entry->path(), "/");
 }
 
 inline std::ostream &operator<<(std::ostream &out, const Io::Field *field)
@@ -21,6 +21,6 @@ inline std::ostream &operator<<(std::ostream &out, const Io::Field *field)
     return out << field->name() << '=' << field->value();
 }
 
-} // namespace TestUtilities
+} // namespace CppUtilities
 
 #endif // PASSWORDFILE_TESTS_UTILS_H

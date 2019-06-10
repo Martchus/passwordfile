@@ -10,6 +10,7 @@
 #include <string>
 
 using namespace std;
+using namespace CppUtilities;
 
 namespace Util {
 
@@ -32,7 +33,7 @@ OpenSslRandomDevice::result_type OpenSslRandomDevice::operator()() const
 {
     unsigned char buf[4];
     if (RAND_bytes(buf, sizeof(buf))) {
-        return ConversionUtilities::LE::toUInt32(reinterpret_cast<char *>(buf));
+        return LE::toUInt32(reinterpret_cast<char *>(buf));
     }
 
     // handle error case

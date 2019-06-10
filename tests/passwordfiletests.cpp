@@ -9,8 +9,8 @@
 
 using namespace std;
 using namespace Io;
-using namespace TestUtilities::Literals;
-
+using namespace CppUtilities;
+using namespace CppUtilities::Literals;
 using namespace CPPUNIT_NS;
 
 /*!
@@ -49,8 +49,7 @@ void PasswordFileTests::tearDown()
  */
 void PasswordFileTests::testReading()
 {
-    testReading(
-        "read", TestUtilities::testFilePath("testfile1.pwmgr"), "123456", TestUtilities::testFilePath("testfile2.pwmgr"), string(), false, false);
+    testReading("read", testFilePath("testfile1.pwmgr"), "123456", testFilePath("testfile2.pwmgr"), string(), false, false);
 }
 
 void PasswordFileTests::testReading(const string &context, const string &testfile1path, const string &testfile1password, const string &testfile2,
@@ -153,8 +152,8 @@ void PasswordFileTests::testReading(const string &context, const string &testfil
  */
 void PasswordFileTests::testBasicWriting()
 {
-    const string testfile1 = TestUtilities::workingCopyPath("testfile1.pwmgr");
-    const string testfile2 = TestUtilities::workingCopyPath("testfile2.pwmgr");
+    const string testfile1 = workingCopyPath("testfile1.pwmgr");
+    const string testfile2 = workingCopyPath("testfile2.pwmgr");
     PasswordFile file;
 
     // resave testfile 1
@@ -187,8 +186,8 @@ void PasswordFileTests::testBasicWriting()
  */
 void PasswordFileTests::testExtendedWriting()
 {
-    const string testfile1 = TestUtilities::workingCopyPath("testfile1.pwmgr");
-    const string testfile2 = TestUtilities::workingCopyPath("testfile2.pwmgr");
+    const string testfile1 = workingCopyPath("testfile1.pwmgr");
+    const string testfile2 = workingCopyPath("testfile2.pwmgr");
     PasswordFile file;
 
     // resave testfile 1
