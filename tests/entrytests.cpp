@@ -190,7 +190,7 @@ void EntryTests::testUniqueLabels()
 {
     NodeEntry root("root");
     const auto *const fooEntry = new AccountEntry("foo", &root);
-    VAR_UNUSED(fooEntry)
+    CPP_UTILITIES_UNUSED(fooEntry)
     const auto *const foo2Entry = new AccountEntry("foo", &root);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("2nd foo renamed to foo 2", "foo 2"s, foo2Entry->label());
     const auto *const foo3Entry = new AccountEntry("foo", &root);
