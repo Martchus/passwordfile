@@ -401,8 +401,10 @@ void PasswordFile::save(PasswordFileSaveFlags options)
     if (m_file.good() && m_file.is_open() && (m_file.flags() & ios_base::out)) {
         m_file.seekp(0);
     } else {
-        m_file.close();
         m_file.clear();
+        if (m_file.is_open()) {
+            m_file.close();
+        }
         m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
     }
 
