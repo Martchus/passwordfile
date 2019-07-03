@@ -48,7 +48,8 @@ enum class PasswordFileSaveFlags : std::uint64_t {
     Encryption = 1,
     Compression = 2,
     PasswordHashing = 4,
-    Default = Encryption | Compression | PasswordHashing,
+    AllowToCreateNewFile = 8,
+    Default = Encryption | Compression | PasswordHashing | AllowToCreateNewFile,
 };
 
 std::string PASSWORD_FILE_EXPORT flagsToString(PasswordFileSaveFlags flags);

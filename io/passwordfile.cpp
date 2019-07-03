@@ -405,7 +405,15 @@ void PasswordFile::save(PasswordFileSaveFlags options)
         if (m_file.is_open()) {
             m_file.close();
         }
-        m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
+        try {
+            m_file.open(m_path, ios_base::in | ios_base::out | ios_base::trunc | ios_base::binary);
+        } catch (const ios_base::failure &) {
+            // try to create a new file if configured via \a options
+            if (!(options & PasswordFileSaveFlags::AllowToCreateNewFile)) {
+                throw;
+            }
+            m_file.open(m_path, ios_base::out | ios_base::trunc | ios_base::binary);
+        }
     }
 
     write(options);
