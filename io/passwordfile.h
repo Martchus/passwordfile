@@ -6,6 +6,7 @@
 #include <c++utilities/io/binaryreader.h>
 #include <c++utilities/io/binarywriter.h>
 #include <c++utilities/io/nativefilestream.h>
+#include <c++utilities/misc/flagenumclass.h>
 
 #include <cstdint>
 #include <fstream>
@@ -25,24 +26,6 @@ enum class PasswordFileOpenFlags : std::uint64_t {
 
 std::string PASSWORD_FILE_EXPORT flagsToString(PasswordFileOpenFlags flags);
 
-constexpr PasswordFileOpenFlags operator|(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
-{
-    return static_cast<PasswordFileOpenFlags>(
-        static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
-}
-
-constexpr PasswordFileOpenFlags &operator|=(PasswordFileOpenFlags &lhs, PasswordFileOpenFlags rhs)
-{
-    return lhs = static_cast<PasswordFileOpenFlags>(static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs)
-               | static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
-}
-
-constexpr bool operator&(PasswordFileOpenFlags lhs, PasswordFileOpenFlags rhs)
-{
-    return static_cast<bool>(
-        static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(lhs) & static_cast<std::underlying_type<PasswordFileOpenFlags>::type>(rhs));
-}
-
 enum class PasswordFileSaveFlags : std::uint64_t {
     None = 0,
     Encryption = 1,
@@ -53,24 +36,6 @@ enum class PasswordFileSaveFlags : std::uint64_t {
 };
 
 std::string PASSWORD_FILE_EXPORT flagsToString(PasswordFileSaveFlags flags);
-
-constexpr PasswordFileSaveFlags operator|(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
-{
-    return static_cast<PasswordFileSaveFlags>(
-        static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs) | static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
-}
-
-constexpr PasswordFileSaveFlags &operator|=(PasswordFileSaveFlags &lhs, PasswordFileSaveFlags rhs)
-{
-    return lhs = static_cast<PasswordFileSaveFlags>(static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs)
-               | static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
-}
-
-constexpr bool operator&(PasswordFileSaveFlags lhs, PasswordFileSaveFlags rhs)
-{
-    return static_cast<bool>(
-        static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(lhs) & static_cast<std::underlying_type<PasswordFileSaveFlags>::type>(rhs));
-}
 
 class PASSWORD_FILE_EXPORT PasswordFile {
 public:
@@ -252,5 +217,8 @@ inline PasswordFileSaveFlags PasswordFile::saveOptions() const
 }
 
 } // namespace Io
+
+CPP_UTILITIES_MARK_FLAG_ENUM_CLASS(Io, Io::PasswordFileOpenFlags);
+CPP_UTILITIES_MARK_FLAG_ENUM_CLASS(Io, Io::PasswordFileSaveFlags);
 
 #endif // PASSWORD_FILE_IO_PASSWORD_FILE_H
