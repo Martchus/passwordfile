@@ -168,7 +168,7 @@ void PasswordFile::create()
  * \throws Throws ios_base::failure when an IO error occurs.
  * \throws Throws Io::ParsingException when a parsing error occurs.
  * \throws Throws Io::CryptoException when a decryption error occurs.
- * \throws Throws ConversionUtilities::ConversionException when a conversion error occurs.
+ * \throws Throws CppUtilities::ConversionException when a conversion error occurs.
  */
 void PasswordFile::load()
 {
