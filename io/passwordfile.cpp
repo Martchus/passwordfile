@@ -507,6 +507,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     if (!(options & PasswordFileSaveFlags::Encryption)) {
         // write data to file
         m_file.write(decryptedData.data(), static_cast<streamsize>(size));
+        m_file.flush();
         return;
     }
 
@@ -560,6 +561,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     }
     m_file.write(reinterpret_cast<char *>(iv), aes256cbcIvSize);
     m_file.write(encryptedData.data(), static_cast<streamsize>(outlen1 + outlen2));
+    m_file.flush();
 }
 
 /*!
