@@ -24,7 +24,7 @@ enum class PasswordFileOpenFlags : std::uint64_t {
     Default = None,
 };
 
-std::string PASSWORD_FILE_EXPORT flagsToString(PasswordFileOpenFlags flags);
+PASSWORD_FILE_EXPORT std::string flagsToString(PasswordFileOpenFlags flags);
 
 enum class PasswordFileSaveFlags : std::uint64_t {
     None = 0,
@@ -35,7 +35,7 @@ enum class PasswordFileSaveFlags : std::uint64_t {
     Default = Encryption | Compression | PasswordHashing | AllowToCreateNewFile,
 };
 
-std::string PASSWORD_FILE_EXPORT flagsToString(PasswordFileSaveFlags flags);
+PASSWORD_FILE_EXPORT std::string flagsToString(PasswordFileSaveFlags flags);
 
 class PASSWORD_FILE_EXPORT PasswordFile {
 public:
