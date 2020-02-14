@@ -589,15 +589,16 @@ void PasswordFile::clear()
 /*!
  * \brief Writes the current root entry to a plain text file. No encryption is used.
  * \param targetPath Specifies the path of the text file.
- * \throws Throws ios_base::failure when an IO error occurs.
- * \throws Throws runtime_error when no root entry is present.
+ * \throws Throws std::ios_base::failure when an IO error occurs and std::runtime_error when no root entry is present.
  */
 void PasswordFile::exportToTextfile(const string &targetPath) const
 {
     if (!m_rootEntry) {
         throw runtime_error("Root entry has not been created.");
     }
-    fstream output(targetPath.c_str(), ios_base::out);
+    NativeFileStream output;
+    output.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    output.open(targetPath, std::ios_base::out);
     const auto printIndention = [&output](int level) {
         for (int i = 0; i < level; ++i) {
             output << "    ";
