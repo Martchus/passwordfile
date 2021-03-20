@@ -66,7 +66,7 @@ void Field::make(ostream &stream) const
     writer.writeLengthPrefixedString(m_value);
     writer.writeByte(static_cast<std::uint8_t>(m_type));
     if (!m_extendedData.empty()) {
-        writer.writeUInt16BE(m_extendedData.size());
+        writer.writeUInt16BE(static_cast<std::uint16_t>(m_extendedData.size()));
         writer.writeString(m_extendedData);
     }
 }

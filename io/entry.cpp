@@ -114,7 +114,7 @@ void Entry::setParent(NodeEntry *parent, int index)
     // attach the new parent
     if (parent) {
         if (index < 0 || static_cast<size_t>(index) >= parent->m_children.size()) {
-            m_index = parent->m_children.size();
+            m_index = static_cast<int>(parent->m_children.size());
             parent->m_children.push_back(this);
         } else {
             for (auto i = parent->m_children.insert(parent->m_children.begin() + index, this) + 1; i != parent->m_children.end(); ++i) {
@@ -265,7 +265,7 @@ NodeEntry::NodeEntry(const NodeEntry &other)
     for (Entry *const otherChild : other.m_children) {
         Entry *clonedChild = otherChild->clone();
         clonedChild->m_parent = this;
-        clonedChild->m_index = m_children.size();
+        clonedChild->m_index = static_cast<int>(m_children.size());
         m_children.push_back(clonedChild);
     }
 }
@@ -334,7 +334,7 @@ void NodeEntry::replaceChild(size_t at, Entry *newChild)
 
     // do the actual assignment
     newChild->m_parent = this;
-    newChild->m_index = at;
+    newChild->m_index = static_cast<int>(at);
     m_children[at] = newChild;
 }
 
@@ -398,7 +398,7 @@ void NodeEntry::make(ostream &stream) const
     writer.writeByte(isExpandedByDefault() && m_extendedData.empty() ? 0x0 : 0x1); // version
     writer.writeLengthPrefixedString(label());
     if (!isExpandedByDefault() || !m_extendedData.empty()) {
-        writer.writeUInt16BE(1 + m_extendedData.size()); // extended header is 1 byte long
+        writer.writeUInt16BE(static_cast<std::uint16_t>(1 + m_extendedData.size())); // extended header is 1 byte long
         std::uint8_t flags = 0x00;
         if (isExpandedByDefault()) {
             flags |= 0x80;
@@ -406,7 +406,7 @@ void NodeEntry::make(ostream &stream) const
         writer.writeByte(flags);
         writer.writeString(m_extendedData);
     }
-    writer.writeUInt32BE(m_children.size());
+    writer.writeUInt32BE(static_cast<std::uint32_t>(m_children.size()));
     for (const Entry *const child : m_children) {
         child->make(stream);
     }
@@ -496,10 +496,10 @@ void AccountEntry::make(ostream &stream) const
     writer.writeByte(0x80 | (m_extendedData.empty() ? 0x0 : 0x1)); // version
     writer.writeLengthPrefixedString(label());
     if (!m_extendedData.empty()) {
-        writer.writeUInt16BE(m_extendedData.size());
+        writer.writeUInt16BE(static_cast<std::uint16_t>(m_extendedData.size()));
         writer.writeString(m_extendedData);
     }
-    writer.writeUInt32BE(m_fields.size());
+    writer.writeUInt32BE(static_cast<std::uint32_t>(m_fields.size()));
     for (const Field &field : m_fields) {
         field.make(stream);
     }

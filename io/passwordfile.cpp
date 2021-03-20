@@ -398,7 +398,7 @@ void PasswordFile::save(PasswordFileSaveFlags options)
     }
 
     // use already opened and writable file; otherwise re-open the file
-    if (m_file.good() && m_file.is_open() && (m_file.flags() & ios_base::out)) {
+    if (m_file.good() && m_file.is_open() && !(m_openOptions & PasswordFileOpenFlags::ReadOnly)) {
         m_file.seekp(0);
     } else {
         m_file.clear();

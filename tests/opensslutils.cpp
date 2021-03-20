@@ -49,7 +49,7 @@ void OpenSslUtilsTests::testComputeSha256Sum()
     string sumAsHex;
     sumAsHex.reserve(64);
     for (unsigned char hashNumber : sum.data) {
-        const string digits = numberToString(hashNumber, 16);
+        const string digits = numberToString(hashNumber, static_cast<unsigned char>(16));
         sumAsHex.push_back(digits.size() < 2 ? '0' : digits.front());
         sumAsHex.push_back(digits.back());
     }
