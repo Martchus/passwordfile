@@ -116,7 +116,7 @@ void PasswordFile::open(PasswordFileOpenFlags options)
 {
     close();
     if (m_path.empty()) {
-        throw std::ios_base::failure("Unable to open file because path is emtpy.");
+        throw std::ios_base::failure("Unable to open file because path is empty.");
     }
     m_file.open(
         m_path, options & PasswordFileOpenFlags::ReadOnly ? ios_base::in | ios_base::binary : ios_base::in | ios_base::out | ios_base::binary);
@@ -450,7 +450,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     }
     m_fwriter.writeByte(flags);
 
-    // write extened header
+    // write extended header
     if (version >= 0x4U) {
         if (m_extendedHeader.size() > numeric_limits<std::uint16_t>::max()) {
             throw runtime_error("Extended header exceeds maximum size.");
@@ -463,7 +463,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     stringstream buffstr(stringstream::in | stringstream::out | stringstream::binary);
     buffstr.exceptions(ios_base::failbit | ios_base::badbit);
 
-    // write encrypted extened header
+    // write encrypted extended header
     if (version >= 0x5U) {
         if (m_encryptedExtendedHeader.size() > numeric_limits<std::uint16_t>::max()) {
             throw runtime_error("Encrypted extended header exceeds maximum size.");

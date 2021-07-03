@@ -5,7 +5,7 @@ namespace Io {
  * \class CryptoException
  * \brief The exception that is thrown when an encryption/decryption error occurs.
  * \remarks Must not have any inline methods/c'tors/d'tors (so the vtable is invoked in any compile unit).
- *          Otherwise it is not possible to throw/catch it accross library boundaries under Android.
+ *          Otherwise it is not possible to throw/catch it across library boundaries under Android.
  */
 
 /*!

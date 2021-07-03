@@ -20,7 +20,7 @@ namespace Io {
 
 /*!
  * \class Entry
- * \brief Instances of the Entry class form a hierarchic data strucutre used to store
+ * \brief Instances of the Entry class form a hierarchic data structure used to store
  *        account information.
  *
  * Entries can be serialized and deserialized using the parse() and make() methods.
@@ -320,7 +320,7 @@ void NodeEntry::replaceChild(size_t at, Entry *newChild)
         return;
     }
 
-    // detatch the old child
+    // detach the old child
     m_children[at]->m_parent = nullptr;
     m_children[at]->m_index = -1;
 

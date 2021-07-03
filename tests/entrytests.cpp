@@ -160,7 +160,7 @@ void EntryTests::testEntryByPath()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("return current instance", static_cast<Entry *>(&root), root.entryByPath(path));
 
     path = { "root", "foo" };
-    CPPUNIT_ASSERT_MESSAGE("nullptr for non-existant path", !root.entryByPath(path));
+    CPPUNIT_ASSERT_MESSAGE("nullptr for non-existent path", !root.entryByPath(path));
 
     path = { "root", "node" };
     const auto *const node = root.entryByPath(path, true, &createNode);
