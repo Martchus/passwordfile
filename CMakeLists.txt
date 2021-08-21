@@ -36,6 +36,12 @@ set(TEST_SRC_FILES tests/utils.h tests/passwordfiletests.cpp tests/entrytests.cp
 
 set(DOC_FILES README.md)
 
+option(COMPILE_AES_SOURCES "compile AES sources" OFF)
+if (COMPILE_AES_SOURCES)
+    list(APPEND HEADER_FILES aes/aes.h)
+    list(APPEND SRC_FILES aes/aes.cpp)
+endif ()
+
 # find c++utilities
 set(CONFIGURATION_PACKAGE_SUFFIX
     ""
