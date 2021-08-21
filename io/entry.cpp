@@ -302,7 +302,7 @@ void NodeEntry::deleteChildren(int begin, int end)
 
     // adjust indices of subsequent children
     const int diff = end - begin;
-    for (auto iterator = m_children.begin() + begin, end = m_children.end(); iterator != end; ++iterator) {
+    for (auto iterator = m_children.begin() + begin, end2 = m_children.end(); iterator != end2; ++iterator) {
         (*iterator)->m_index -= diff;
     }
 }
