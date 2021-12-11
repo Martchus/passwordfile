@@ -494,7 +494,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
         case Z_BUF_ERROR:
             throw runtime_error("Compressing failed. The destination buffer was too small.");
         case Z_OK:
-            encryptedData.swap(decryptedData); // decompression successful
+            encryptedData.swap(decryptedData); // compression successful
             size = 8 + compressedSize;
         }
     }
