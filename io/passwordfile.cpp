@@ -28,7 +28,9 @@ using namespace CppUtilities;
 
 namespace Io {
 
-const unsigned int aes256cbcIvSize = 16U;
+constexpr unsigned int aes256cbcIvSize = 16U;
+constexpr unsigned int aes256blockSize = 32U;
+constexpr unsigned int aes256additionalBufferSize = aes256blockSize * 2;
 
 /*!
  * \class PasswordFile
@@ -272,7 +274,7 @@ void PasswordFile::load()
 
         // initiate ctx, decrypt data
         EVP_CIPHER_CTX *ctx = nullptr;
-        decryptedData.resize(remainingSize + 32);
+        decryptedData.resize(remainingSize + aes256additionalBufferSize);
         int outlen1, outlen2;
         if ((ctx = EVP_CIPHER_CTX_new()) == nullptr || EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, password.data, iv) != 1
             || EVP_DecryptUpdate(ctx, reinterpret_cast<unsigned char *>(decryptedData.data()), &outlen1,
@@ -528,7 +530,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     EVP_CIPHER_CTX *ctx = nullptr;
     unsigned char iv[aes256cbcIvSize];
     int outlen1, outlen2;
-    encryptedData.resize(size + 32);
+    encryptedData.resize(size + aes256additionalBufferSize);
     if (RAND_bytes(iv, aes256cbcIvSize) != 1 || (ctx = EVP_CIPHER_CTX_new()) == nullptr
         || EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, password.data, iv) != 1
         || EVP_EncryptUpdate(ctx, reinterpret_cast<unsigned char *>(encryptedData.data()), &outlen1,
