@@ -7,3 +7,6 @@ applying the encryption.
 ## Build instructions
 The passwordfile library depends on c++utilities and is built in the same way.
 It also depends on OpenSSL and zlib.
+
+## License
+All code is licensed under [GPL-2-or-later](LICENSE).
