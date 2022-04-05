@@ -8,5 +8,7 @@ applying the encryption.
 The passwordfile library depends on c++utilities and is built in the same way.
 It also depends on OpenSSL and zlib.
 
-## License
+## Copyright notice and license
+Copyright © 2015-2022 Marius Kittler
+
 All code is licensed under [GPL-2-or-later](LICENSE).
