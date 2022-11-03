@@ -49,16 +49,8 @@ void clean()
  */
 Sha256Sum computeSha256Sum(const unsigned char *buffer, std::size_t size)
 {
-    // init sha256 hashing
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-
-    // do the actual hashing
-    SHA256_Update(&sha256, buffer, size);
-
-    // finalize the hashing
-    Sha256Sum hash;
-    SHA256_Final(hash.data, &sha256);
+    auto hash = Sha256Sum();
+    SHA256(buffer, size, hash.data);
     return hash;
 }
 
