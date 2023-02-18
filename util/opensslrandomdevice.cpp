@@ -45,7 +45,7 @@ OpenSslRandomDevice::result_type OpenSslRandomDevice::operator()() const
         errorMsg += ERR_error_string(errorCode, nullptr);
         errorCode = ERR_get_error();
     }
-    throw Io::CryptoException(move(errorMsg));
+    throw Io::CryptoException(std::move(errorMsg));
 }
 
 /*!

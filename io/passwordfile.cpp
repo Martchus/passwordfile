@@ -89,12 +89,12 @@ PasswordFile::PasswordFile(const PasswordFile &other)
  * \brief Moves the password file.
  */
 PasswordFile::PasswordFile(PasswordFile &&other)
-    : m_path(move(other.m_path))
-    , m_password(move(other.m_password))
-    , m_rootEntry(move(other.m_rootEntry))
-    , m_extendedHeader(move(other.m_extendedHeader))
-    , m_encryptedExtendedHeader(move(other.m_encryptedExtendedHeader))
-    , m_file(move(other.m_file))
+    : m_path(std::move(other.m_path))
+    , m_password(std::move(other.m_password))
+    , m_rootEntry(std::move(other.m_rootEntry))
+    , m_extendedHeader(std::move(other.m_extendedHeader))
+    , m_encryptedExtendedHeader(std::move(other.m_encryptedExtendedHeader))
+    , m_file(std::move(other.m_file))
     , m_freader(BinaryReader(&m_file))
     , m_fwriter(BinaryWriter(&m_file))
     , m_version(other.m_version)
@@ -294,7 +294,7 @@ void PasswordFile::load()
                 msg += ERR_error_string(errorCode, nullptr);
                 errorCode = ERR_get_error();
             }
-            throw CryptoException(move(msg));
+            throw CryptoException(std::move(msg));
         }
 
         if (ctx) {
@@ -550,7 +550,7 @@ void PasswordFile::write(PasswordFileSaveFlags options)
             msg += ERR_error_string(errorCode, nullptr);
             errorCode = ERR_get_error();
         }
-        throw CryptoException(move(msg));
+        throw CryptoException(std::move(msg));
     }
 
     if (ctx) {
