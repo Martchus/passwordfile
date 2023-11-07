@@ -390,9 +390,10 @@ std::uint32_t PasswordFile::mininumVersion(PasswordFileSaveFlags options) const
 /*!
  * \brief Writes the current root entry to the file under path() replacing its previous contents.
  * \param options Specify the features (like encryption and compression) to be used.
- * \throws Throws ios_base::failure when an IO error occurs.
- * \throws Throws runtime_error when no root entry is present or a compression error occurs.
+ * \throws Throws std::ios_base::failure when an IO error occurs.
+ * \throws Throws std::filesystem::filesystem_error when a filesystem error occurs.
  * \throws Throws Io::CryptoException when an encryption error occurs.
+ * \throws Throws std::runtime_error when no root entry is present or a compression error occurs.
  */
 void PasswordFile::save(PasswordFileSaveFlags options)
 {
@@ -436,9 +437,9 @@ void PasswordFile::save(PasswordFileSaveFlags options)
 /*!
  * \brief Writes the current root entry to the file which is assumed to be opened and writeable.
  * \param options Specify the features (like encryption and compression) to be used.
- * \throws Throws ios_base::failure when an IO error occurs.
- * \throws Throws runtime_error when no root entry is present or a compression error occurs.
+ * \throws Throws std::ios_base::failure when an IO error occurs.
  * \throws Throws Io::CryptoException when an encryption error occurs.
+ * \throws Throws std::runtime_error when no root entry is present, a compression error occurs.
  */
 void PasswordFile::write(PasswordFileSaveFlags options)
 {
