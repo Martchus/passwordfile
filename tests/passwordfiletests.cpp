@@ -208,7 +208,7 @@ void PasswordFileTests::testExtendedWriting()
     CPPUNIT_ASSERT_EQUAL(""s, file.extendedHeader());
     CPPUNIT_ASSERT_EQUAL(""s, file.encryptedExtendedHeader());
     file.rootEntry()->setLabel("testfile2 - modified");
-    new AccountEntry("newAccount", file.rootEntry());
+    auto *const newAccount = new AccountEntry("newAccount", file.rootEntry());
     file.setPassword("654321");
     file.extendedHeader() = "foo";
     file.encryptedExtendedHeader() = "bar";
@@ -220,4 +220,18 @@ void PasswordFileTests::testExtendedWriting()
 
     // check backup files
     testReading("extended writing", testfile1 + ".backup", "123456", testfile2 + ".backup", string(), false, false);
+
+    // remove newAccount again to check what happens if the file size decreases
+    const auto fileSize = file.size();
+    delete newAccount;
+    file.save(PasswordFileSaveFlags::Encryption | PasswordFileSaveFlags::PasswordHashing);
+    file.close();
+    file.clearEntries();
+    file.open();
+    CPPUNIT_ASSERT_LESS(fileSize, file.size());
+    file.load();
+
+    auto path = std::list<std::string>{"newAccount"};
+    CPPUNIT_ASSERT(file.rootEntry());
+    CPPUNIT_ASSERT(!file.rootEntry()->entryByPath(path));
 }

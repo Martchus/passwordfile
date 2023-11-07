@@ -53,6 +53,7 @@ use_cpp_utilities(VISIBILITY PUBLIC)
 include(3rdParty)
 use_zlib()
 use_crypto()
+use_standard_filesystem()
 
 # include modules to apply configuration
 include(BasicConfig)

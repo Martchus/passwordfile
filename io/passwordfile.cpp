@@ -17,6 +17,7 @@
 #include <zlib.h>
 
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -400,7 +401,9 @@ void PasswordFile::save(PasswordFileSaveFlags options)
     }
 
     // use already opened and writable file; otherwise re-open the file
+    auto fileSize = std::size_t();
     if (m_file.good() && m_file.is_open() && !(m_openOptions & PasswordFileOpenFlags::ReadOnly)) {
+        fileSize = size();
         m_file.seekp(0);
     } else {
         m_file.clear();
@@ -418,8 +421,16 @@ void PasswordFile::save(PasswordFileSaveFlags options)
         }
     }
 
+    // write entries
     write(options);
     m_file.flush();
+
+    // truncate file if it became smaller
+    const auto newSize = static_cast<std::size_t>(m_file.tellp());
+    if (fileSize && newSize < fileSize) {
+        m_file.close();
+        std::filesystem::resize_file(m_path, newSize);
+    }
 }
 
 /*!
