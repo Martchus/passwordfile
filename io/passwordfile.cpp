@@ -8,6 +8,7 @@
 
 #include <c++utilities/conversion/stringbuilder.h>
 #include <c++utilities/conversion/stringconversion.h>
+#include <c++utilities/io/path.h>
 
 #include <openssl/conf.h>
 #include <openssl/err.h>
@@ -430,7 +431,7 @@ void PasswordFile::save(PasswordFileSaveFlags options)
     const auto newSize = static_cast<std::size_t>(m_file.tellp());
     if (fileSize && newSize < fileSize) {
         m_file.close();
-        std::filesystem::resize_file(m_path, newSize);
+        std::filesystem::resize_file(makeNativePath(m_path), newSize);
     }
 }
 
