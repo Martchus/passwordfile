@@ -231,7 +231,7 @@ void PasswordFileTests::testExtendedWriting()
     CPPUNIT_ASSERT_LESS(fileSize, file.size());
     file.load();
 
-    auto path = std::list<std::string>{"newAccount"};
+    auto path = std::list<std::string>{ "newAccount" };
     CPPUNIT_ASSERT(file.rootEntry());
     CPPUNIT_ASSERT(!file.rootEntry()->entryByPath(path));
 }
