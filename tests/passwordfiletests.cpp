@@ -2,7 +2,7 @@
 #include "../io/entry.h"
 #include "../io/passwordfile.h"
 
-#include <c++utilities/tests/testutils.h>
+#include "./utils.h"
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>

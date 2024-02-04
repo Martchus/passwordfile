@@ -3,9 +3,6 @@
 
 #include "./utils.h"
 
-#include <c++utilities/tests/testutils.h>
-using namespace CppUtilities;
-
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 

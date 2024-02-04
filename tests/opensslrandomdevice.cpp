@@ -1,6 +1,6 @@
 #include "../util/opensslrandomdevice.h"
 
-#include <c++utilities/tests/testutils.h>
+#include "./utils.h"
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>

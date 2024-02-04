@@ -23,4 +23,8 @@ inline std::ostream &operator<<(std::ostream &out, const Io::Field *field)
 
 } // namespace CppUtilities
 
+#include <c++utilities/tests/testutils.h>
+
+using namespace CppUtilities;
+
 #endif // PASSWORDFILE_TESTS_UTILS_H
