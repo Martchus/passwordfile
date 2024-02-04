@@ -10,7 +10,7 @@ set(META_APP_URL "https://github.com/${META_APP_AUTHOR}/${META_PROJECT_NAME}")
 set(META_APP_DESCRIPTION "C++ library to read/write passwords from/to encrypted files")
 set(META_VERSION_MAJOR 5)
 set(META_VERSION_MINOR 0)
-set(META_VERSION_PATCH 10)
+set(META_VERSION_PATCH 11)
 set(META_ADD_DEFAULT_CPP_UNIT_TEST_APPLICATION ON)
 
 # add project files
