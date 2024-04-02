@@ -4,7 +4,7 @@
 #ifndef PASSWORD_FILE_GLOBAL
 #define PASSWORD_FILE_GLOBAL
 
-#include "passwordfile-devel-definitions.h"
+#include "passwordfile-definitions.h"
 #include <c++utilities/application/global.h>
 
 #ifdef PASSWORD_FILE_STATIC
