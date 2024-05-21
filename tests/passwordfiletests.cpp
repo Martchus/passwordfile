@@ -84,7 +84,7 @@ void PasswordFileTests::testReading(const string &context, const string &testfil
     CPPUNIT_ASSERT(
         static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(0).tiedAccount() == static_cast<AccountEntry *>(rootEntry->children()[0]));
     CPPUNIT_ASSERT_EQUAL_MESSAGE(context, FieldType::Normal, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(1).type());
-    CPPUNIT_ASSERT_THROW_MESSAGE(context, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().at(2), out_of_range);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(context, 2_st, static_cast<AccountEntry *>(rootEntry->children()[0])->fields().size());
 
     // test testaccount2
     CPPUNIT_ASSERT_EQUAL_MESSAGE(context, "testaccount2"s, rootEntry->children()[1]->label());
