@@ -489,7 +489,10 @@ void PasswordFile::write(PasswordFileSaveFlags options)
     }
     m_rootEntry->make(buffstr);
     buffstr.seekp(0, ios_base::end);
-    auto size = static_cast<size_t>(buffstr.tellp());
+    auto size = static_cast<std::size_t>(buffstr.tellp());
+    if (size > std::numeric_limits<uLong>::max()) {
+        throw std::runtime_error("File size exceeds maximum size.");
+    }
 
     // write the data to a buffer
     buffstr.seekg(0);
@@ -499,11 +502,11 @@ void PasswordFile::write(PasswordFileSaveFlags options)
 
     // compress data
     if (options & PasswordFileSaveFlags::Compression) {
-        uLongf compressedSize = compressBound(size);
+        auto compressedSize = static_cast<uLongf>(compressBound(static_cast<uLong>(size)));
         encryptedData.resize(8 + compressedSize);
         LE::getBytes(static_cast<std::uint64_t>(size), encryptedData.data());
         switch (
-            compress(reinterpret_cast<Bytef *>(encryptedData.data() + 8), &compressedSize, reinterpret_cast<Bytef *>(decryptedData.data()), size)) {
+            compress(reinterpret_cast<Bytef *>(encryptedData.data() + 8), &compressedSize, reinterpret_cast<Bytef *>(decryptedData.data()), static_cast<uLong>(size))) {
         case Z_MEM_ERROR:
             throw runtime_error("Compressing failed. The source buffer was too small.");
         case Z_BUF_ERROR:
