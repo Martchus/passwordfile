@@ -505,8 +505,8 @@ void PasswordFile::write(PasswordFileSaveFlags options)
         auto compressedSize = static_cast<uLongf>(compressBound(static_cast<uLong>(size)));
         encryptedData.resize(8 + compressedSize);
         LE::getBytes(static_cast<std::uint64_t>(size), encryptedData.data());
-        switch (
-            compress(reinterpret_cast<Bytef *>(encryptedData.data() + 8), &compressedSize, reinterpret_cast<Bytef *>(decryptedData.data()), static_cast<uLong>(size))) {
+        switch (compress(reinterpret_cast<Bytef *>(encryptedData.data() + 8), &compressedSize, reinterpret_cast<Bytef *>(decryptedData.data()),
+            static_cast<uLong>(size))) {
         case Z_MEM_ERROR:
             throw runtime_error("Compressing failed. The source buffer was too small.");
         case Z_BUF_ERROR:
