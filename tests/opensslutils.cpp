@@ -1,5 +1,6 @@
 #include "../util/openssl.h"
 
+#include <c++utilities/chrono/datetime.h>
 #include <c++utilities/conversion/stringconversion.h>
 #include <c++utilities/tests/testutils.h>
 
@@ -22,6 +23,7 @@ class OpenSslUtilsTests : public TestFixture {
     CPPUNIT_TEST_SUITE(OpenSslUtilsTests);
     CPPUNIT_TEST(testComputeSha256Sum);
     CPPUNIT_TEST(testGenerateRandomNumber);
+    CPPUNIT_TEST(testComputeTOTP);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -30,6 +32,7 @@ public:
 
     void testComputeSha256Sum();
     void testGenerateRandomNumber();
+    void testComputeTOTP();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(OpenSslUtilsTests);
@@ -61,4 +64,18 @@ void OpenSslUtilsTests::testGenerateRandomNumber()
 {
     CPPUNIT_ASSERT_EQUAL(static_cast<uint32_t>(0u), generateRandomNumber(0u, 0u));
     CPPUNIT_ASSERT_EQUAL(static_cast<uint32_t>(1u), generateRandomNumber(1u, 1u));
+}
+
+void OpenSslUtilsTests::testComputeTOTP()
+{
+    const auto urlDigits6Period30 = "otpauth://totp/foo%20bar?secret=ABCDABCDABCDABCD&period=30&digits=6&issuer=foo%20bar";
+    const auto urlDigits8Period15 = "otpauth://totp/foo%20bar?secret=ABCDABCDABCDABCD&period=15&digits=8&issuer=foo%20bar";
+    const auto urlSha256Digits8 = "otpauth://totp/foo%20bar?secret=ABCDABCDABCDABCD&period=30&digits=8&algorithm=SHA256";
+    const auto urlSha512Digits10 = "otpauth://totp/foo%20bar?secret=ABCDABCDABCDABCD&period=30&digits=10&algorithm=SHA512";
+
+    const auto time = DateTime::fromDateAndTime(2026, 5, 2, 10, 52, 30);
+    CPPUNIT_ASSERT_EQUAL("757702"s, computeTOTP(urlDigits6Period30, time));
+    CPPUNIT_ASSERT_EQUAL("41448963"s, computeTOTP(urlDigits8Period15, time));
+    CPPUNIT_ASSERT_EQUAL("10222808"s, computeTOTP(urlSha256Digits8, time));
+    CPPUNIT_ASSERT_EQUAL("0340892126"s, computeTOTP(urlSha512Digits10, time));
 }

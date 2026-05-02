@@ -5,6 +5,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <string_view>
+
+namespace CppUtilities {
+class DateTime;
+}
 
 namespace Util {
 
@@ -19,6 +25,7 @@ PASSWORD_FILE_EXPORT void init();
 PASSWORD_FILE_EXPORT void clean();
 PASSWORD_FILE_EXPORT Sha256Sum computeSha256Sum(const unsigned char *buffer, std::size_t size);
 PASSWORD_FILE_EXPORT std::uint32_t generateRandomNumber(std::uint32_t min, std::uint32_t max);
+PASSWORD_FILE_EXPORT std::string computeTOTP(std::string_view url, CppUtilities::DateTime time);
 
 } // namespace OpenSsl
 } // namespace Util
