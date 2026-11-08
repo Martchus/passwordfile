@@ -121,7 +121,7 @@ public:
     NodeEntry(const NodeEntry &other);
     ~NodeEntry() override;
 
-    EntryType type() const override;
+    inline EntryType type() const override;
     inline const std::vector<Entry *> &children() const;
     void deleteChildren(int begin, int end);
     void replaceChild(std::size_t at, Entry *newChild);
@@ -175,7 +175,7 @@ public:
     AccountEntry(const AccountEntry &other);
     ~AccountEntry() override;
 
-    EntryType type() const override;
+    inline EntryType type() const override;
     inline const std::vector<Field> &fields() const;
     inline std::vector<Field> &fields();
     void make(std::ostream &stream) const override;
