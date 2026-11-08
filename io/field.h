@@ -14,20 +14,20 @@ class AccountEntry;
 
 class PASSWORD_FILE_EXPORT Field {
 public:
-    Field();
+    inline Field();
     Field(AccountEntry *tiedAccount, const std::string &name = {}, const std::string &value = {});
     Field(AccountEntry *tiedAccount, std::istream &stream);
 
-    bool isEmpty() const;
-    const std::string &name() const;
-    void setName(const std::string &name);
-    const std::string &value() const;
-    void setValue(const std::string &value);
-    FieldType type() const;
-    void setType(FieldType type);
-    AccountEntry *tiedAccount() const;
+    inline bool isEmpty() const;
+    inline const std::string &name() const;
+    inline void setName(const std::string &name);
+    inline const std::string &value() const;
+    inline void setValue(const std::string &value);
+    inline FieldType type() const;
+    inline void setType(FieldType type);
+    inline AccountEntry *tiedAccount() const;
     void make(std::ostream &stream) const;
-    static bool isValidType(int number);
+    inline static bool isValidType(int number);
 
 private:
     std::string m_name;

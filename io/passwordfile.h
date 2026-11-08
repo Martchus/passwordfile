@@ -45,7 +45,7 @@ public:
     PasswordFile(const PasswordFile &other);
     PasswordFile(PasswordFile &&other);
     ~PasswordFile();
-    CppUtilities::NativeFileStream &fileStream();
+    inline CppUtilities::NativeFileStream &fileStream();
     void open(PasswordFileOpenFlags options = PasswordFileOpenFlags::Default);
     void opened();
     void generateRootEntry();
@@ -62,23 +62,23 @@ public:
     bool hasRootEntry() const;
     const NodeEntry *rootEntry() const;
     NodeEntry *rootEntry();
-    const std::string &path() const;
-    const std::string &password() const;
+    inline const std::string &path() const;
+    inline const std::string &password() const;
     void setPath(const std::string &value);
-    void clearPath();
-    void setPassword(const std::string &password);
-    void setPassword(const char *password, const std::size_t passwordSize);
-    void clearPassword();
+    inline void clearPath();
+    inline void setPassword(const std::string &password);
+    inline void setPassword(const char *password, const std::size_t passwordSize);
+    inline void clearPassword();
     bool isEncryptionUsed();
-    bool isOpen() const;
-    std::string &extendedHeader();
-    const std::string &extendedHeader() const;
-    std::string &encryptedExtendedHeader();
-    const std::string &encryptedExtendedHeader() const;
+    inline bool isOpen() const;
+    inline std::string &extendedHeader();
+    inline const std::string &extendedHeader() const;
+    inline std::string &encryptedExtendedHeader();
+    inline const std::string &encryptedExtendedHeader() const;
     std::size_t size();
-    std::uint32_t version() const;
-    PasswordFileOpenFlags openOptions() const;
-    PasswordFileSaveFlags saveOptions() const;
+    inline std::uint32_t version() const;
+    inline PasswordFileOpenFlags openOptions() const;
+    inline PasswordFileSaveFlags saveOptions() const;
     std::string summary(PasswordFileSaveFlags saveOptions) const;
 
 private:

@@ -34,21 +34,21 @@ public:
     virtual ~Entry();
     Entry &operator=(const Entry &other) = delete;
     virtual EntryType type() const = 0;
-    const std::string &label() const;
-    void setLabel(const std::string &label);
+    inline const std::string &label() const;
+    inline void setLabel(const std::string &label);
     void makeLabelUnique();
-    NodeEntry *parent() const;
+    inline NodeEntry *parent() const;
     void setParent(NodeEntry *parent, int index = -1);
-    int index() const;
+    inline int index() const;
     bool isIndirectChildOf(const NodeEntry *entry) const;
     std::list<std::string> path() const;
     void path(std::list<std::string> &res) const;
     virtual void make(std::ostream &stream) const = 0;
     virtual Entry *clone() const = 0;
-    EntryStatistics computeStatistics() const;
+    inline EntryStatistics computeStatistics() const;
     virtual void accumulateStatistics(EntryStatistics &stats) const = 0;
     static Entry *parse(std::istream &stream);
-    static bool denotesNodeEntry(std::uint8_t version);
+    inline static bool denotesNodeEntry(std::uint8_t version);
     static constexpr EntryType denotedEntryType(std::uint8_t version);
 
 protected:
@@ -122,12 +122,12 @@ public:
     ~NodeEntry() override;
 
     EntryType type() const override;
-    const std::vector<Entry *> &children() const;
+    inline const std::vector<Entry *> &children() const;
     void deleteChildren(int begin, int end);
     void replaceChild(std::size_t at, Entry *newChild);
     Entry *entryByPath(std::list<std::string> &path, bool includeThis = true, const EntryType *creationType = nullptr);
-    bool isExpandedByDefault() const;
-    void setExpandedByDefault(bool expandedByDefault);
+    inline bool isExpandedByDefault() const;
+    inline void setExpandedByDefault(bool expandedByDefault);
     void make(std::ostream &stream) const override;
     NodeEntry *clone() const override;
     void accumulateStatistics(EntryStatistics &stats) const override;
@@ -176,8 +176,8 @@ public:
     ~AccountEntry() override;
 
     EntryType type() const override;
-    const std::vector<Field> &fields() const;
-    std::vector<Field> &fields();
+    inline const std::vector<Field> &fields() const;
+    inline std::vector<Field> &fields();
     void make(std::ostream &stream) const override;
     AccountEntry *clone() const override;
     void accumulateStatistics(EntryStatistics &stats) const override;
