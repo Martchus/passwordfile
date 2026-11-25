@@ -215,6 +215,9 @@ TOTP computeTOTP(std::string_view url, CppUtilities::DateTime time)
     if (period < 1 || digits < 1) {
         throw CppUtilities::ConversionException("period and digits must be >= 1");
     }
+    if (digits > 10) {
+        throw CppUtilities::ConversionException("digits must be <= 10");
+    }
 
     // encode the counter as a 64-bit big-endian integer as per RFC 6238
     auto timeStamp = static_cast<std::uint64_t>(time.toTimeStamp());
